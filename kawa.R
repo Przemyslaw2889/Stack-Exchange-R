@@ -7,3 +7,4 @@ Posts <- data.frame(t(data.frame(lapply(xmlToList("Posts.xml"), "[", 1:9))))
 Users <- data.frame(t(data.frame(lapply(xmlToList("Users.xml"),"[",1:9))),row.names = 1:5826)
 Tags <- data.frame(t(data.frame(lapply(xmlToList("Tags.xml"),"[",1:3))),row.names = 1:106)
 Votes <- data.frame(t(data.frame(lapply(xmlToList("Votes.xml"),"[",1:4))))
+#wczytanie danych, nie wiem jak wczytaæ do data.frame z listy gdy jest ró¿na d³ugoœæ elementów w liœcie
