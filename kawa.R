@@ -44,13 +44,28 @@ lok_najw_pkt <- lokacje(najw_pkt$Location[1:10])
 
 points(lok_najw_pkt$lon,lok_najw_pkt$lan, pch = 16, cex = 0.7, col = "blue")
 
-legend(x = -183, y = -55,col = c("red","blue"), legend = c("aktywny uzytkownik","duz¹ liczb¹ lajków"),pch = 16)
+legend(x = -183, y = -53,col = c("red","blue"), legend = c("aktywny uzytkownik","duz¹ liczb¹ lajków"),pch = 16)
 #Ranking miast
 miasta_najwieksza_ilosc_pkt <- najw_pkt %>% group_by(Location) %>% summarise(suma = sum(pkt)) %>% arrange(desc(suma)) %>% na.omit()
 miasta_najaaktywniejsi_uzytkownicy <- najaktywniejsi_urzytkownicy %>% group_by(Location) %>% summarise(suma = sum(ilosc)) %>%
   arrange(desc(suma)) %>% na.omit()
 miasta_najaaktywniejsi_uzytkownicy[1:10,]
 miasta_najwieksza_ilosc_pkt[1:10,]
+#Histogramy
+Votes_czas <- as.numeric(format(as.Date(Votes$CreationDate, "%Y"),"%Y"))
+Posts_czas <- as.numeric(format(as.Date(Posts$CreationDate, "%Y"),"%Y"))
+Comments_czas <- as.numeric(format(as.Date(Comments$CreationDate, "%Y"),"%Y"))
+
+par(mar = c(5,4.5,2.1,2))
+hist(Votes_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby lajków w latach",xlab= "Rok",
+     ylab = "Liczba lajków",las=1)
+box()
+hist(Posts_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby dodawanych postów w latach",xlab= "Rok",
+     ylab = "Liczba dodanych postów",las=1)
+box()
+hist(Comments_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby dodawanych komentarzy w latach",xlab= "Rok",
+     ylab = "Liczba dodanych komentarzy",las=1)
+box()
 
 
 
