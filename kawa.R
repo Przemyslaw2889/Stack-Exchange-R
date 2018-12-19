@@ -13,7 +13,7 @@ Votes <- xml_data_frame("Votes.xml")
 #mapa
 library(ggmap)
 library(stringi)
-lokacje <- function(lokalizacje){
+library(tidytext)lokacje <- function(lokalizacje){
   location <- strsplit(lokalizacje[stri_detect_regex(lokalizacje,",")], split = ",")
   location <- location[!is.na(location)]
   lokalizacje <- matrix(unlist(lapply(location,function(x) geocode(x[1],source = "dsk"))),ncol = 2,byrow = TRUE)
@@ -67,6 +67,47 @@ hist(Comments_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram lic
      ylab = "Liczba dodanych komentarzy",las=1)
 box()
 
+#text-mining (baaaardzo elementarny)
+library(tidytext)
+get_sentiments("afinn")
+df_on_list <- function(x){
+  x <- data.frame(x)
+  colnames(x) <- "word"
+  x
+}
 
 
+list <- as.list(Comments$Text)
+list <- lapply(list,stri_extract_all_regex,"[A-z]+")
+list <- lapply(list,df_on_list)
+list <- lapply(list, function(x){
+  x %>%
+    inner_join(data.frame(get_sentiments("nrc")),by = "word") %>% 
+    group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
+  })
+
+from_df_to_vector <- function(x){
+  vec <- x[,2]
+  names(vec) <- x[,1]
+  vec
+  }
+
+sentiment_vector <- unlist(lapply(list, from_df_to_vector))
+#emocje
+df_sentiment <- data.frame(sentiment_vector, names(sentiment_vector))
+df_sentiment <- df_sentiment %>% group_by(names.sentiment_vector.) %>%
+  summarise(suma = sum(sentiment_vector), liczba = n())
+
+par(oma = c(0,0,0,0))
+par(mar = c(6,4,3,2))
+plot(df_sentiment$suma, x = 1:10, type = "h", axes = FALSE,
+     ylab = '', col = "red",xlab = "", lwd = 2)
+axis(2,las = 1)
+axis(1,at = 1:10,labels = df_sentiment$names.sentiment_vector., las = 2)
+box()
+for (i in 1:length(df_sentiment$liczba)){
+  lines(c(i+0.2,i+0.2),c(0,df_sentiment$liczba[i]),lwd=2)
+}
+
+legend(x = 0.62, y = 5050,col = c("red","black"), legend = c("liczba","suma"),lty = 1,lwd = 2)
 
