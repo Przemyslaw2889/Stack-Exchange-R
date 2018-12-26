@@ -10,10 +10,19 @@ Users <- xml_data_frame("Users.xml")
 Tags <- xml_data_frame("Tags.xml")
 Votes <- xml_data_frame("Votes.xml")
 
-#mapa
+#biblioteki
 library(ggmap)
 library(stringi)
-library(tidytext)lokacje <- function(lokalizacje){
+library(tidytext)
+library(dplyr)
+library(maps)
+library(tidytext)
+library(tm)
+library(wordcloud)
+library(qdap)
+
+#mapa
+lokacje <- function(lokalizacje){
   location <- strsplit(lokalizacje[stri_detect_regex(lokalizacje,",")], split = ",")
   location <- location[!is.na(location)]
   lokalizacje <- matrix(unlist(lapply(location,function(x) geocode(x[1],source = "dsk"))),ncol = 2,byrow = TRUE)
@@ -24,12 +33,12 @@ library(tidytext)lokacje <- function(lokalizacje){
 
 lokalizacje <- lokacje(Users$Location)
 #install.packages("maps")
-library(maps)
+
 par(mar=c(0,0,0,0))
 map('world',col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,mar=rep(0,4),border=0, ylim=c(-80,80),main ="mapa")
 points(lokalizacje$lon,lokalizacje$lan,pch = 16,cex = 0.7, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.2))
 
-library(dplyr)
+
 najaktywniejsi_uzytkownicy <- Posts %>% group_by(OwnerUserId) %>% summarise(ilosc = n()) %>% 
   left_join(Users,by = c("OwnerUserId" = "Id")) %>% select(ilosc,OwnerUserId, Location) %>% arrange(desc(ilosc)) %>% as.data.frame()
 
@@ -51,6 +60,7 @@ miasta_najaaktywniejsi_uzytkownicy <- najaktywniejsi_urzytkownicy %>% group_by(L
   arrange(desc(suma)) %>% na.omit()
 miasta_najaaktywniejsi_uzytkownicy[1:10,]
 miasta_najwieksza_ilosc_pkt[1:10,]
+
 #Histogramy
 Votes_czas <- as.numeric(format(as.Date(Votes$CreationDate, "%Y"),"%Y"))
 Posts_czas <- as.numeric(format(as.Date(Posts$CreationDate, "%Y"),"%Y"))
@@ -67,8 +77,10 @@ hist(Comments_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram lic
      ylab = "Liczba dodanych komentarzy",las=1)
 box()
 
+frequency <- freq_terms(Comments$Text, top = 10, stopwords = stopwords("en"))
+plot(frequency)
+
 #text-mining (baaaardzo elementarny)
-library(tidytext)
 get_sentiments("afinn")
 df_on_list <- function(x){
   x <- data.frame(x)
@@ -109,5 +121,23 @@ for (i in 1:length(df_sentiment$liczba)){
   lines(c(i+0.2,i+0.2),c(0,df_sentiment$liczba[i]),lwd=2)
 }
 
-legend(x = 0.62, y = 5050,col = c("red","black"), legend = c("liczba","suma"),lty = 1,lwd = 2)
+legend(x = 0.63, y = 5050,col = c("red","black"), legend = c("liczba","suma"),lty = 1,lwd = 2)
 
+#word cloud
+clean_corpus <- function(corpus) {
+  corpus <- tm_map(corpus, removePunctuation)
+  corpus <- tm_map(corpus, content_transformer(tolower))
+  corpus <- tm_map(corpus, removeWords, stopwords("en"))
+  corpus <- tm_map(corpus, stripWhitespace)
+  return(corpus)
+}#czysczenie danych ze znakow interpunkcyjnych, usuwuanie tzw. stopwords ("the", "I" itd), zmiana wszystkiego na male listery oraz
+#usuwanie bialych spacji
+
+Comm_corp <- VCorpus(VectorSource(Comments$Text))
+Comm_corp <- clean_corpus(Comm_corp)
+
+tdm_comm <- as.matrix(TermDocumentMatrix(Comm_corp))
+freq_word <- rowSums(tdm_comm)
+freq_word <- sort(freq_word, decreasing = TRUE)
+
+wordcloud(names(freq_word),freq_word ,max.words = 50, col = "steelblue")
