@@ -1,6 +1,6 @@
 source("df_from_xml.R")
 options(stringsAsFactors = FALSE)
-setwd("data/coffee.stackexchange.com/") 
+setwd("coffee.stackexchange.com/") 
 
 Comments <- xml_data_frame("Comments.xml")
 Badges <- xml_data_frame("Badges.xml")
