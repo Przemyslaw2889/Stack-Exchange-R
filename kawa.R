@@ -1,6 +1,6 @@
 source("df_from_xml.R")
 options(stringsAsFactors = FALSE)
-setwd("coffee.stackexchange.com/")
+setwd("data/coffee.stackexchange.com/") 
 
 Comments <- xml_data_frame("Comments.xml")
 Badges <- xml_data_frame("Badges.xml")
@@ -32,7 +32,8 @@ lokacje <- function(lokalizacje){
   }
 
 lokalizacje <- lokacje(Users$Location)
-#install.packages("maps")
+#saveRDS(lokalizacje, file="lokalizacje_kawa.rds")
+lokalizacje <- readRDS("lokalizacje_kawa.rds")
 
 par(mar=c(0,0,0,0))
 map('world',col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,mar=rep(0,4),border=0, ylim=c(-80,80),main ="mapa")
@@ -53,12 +54,12 @@ lok_najw_pkt <- lokacje(najw_pkt$Location[1:10])
 
 points(lok_najw_pkt$lon,lok_najw_pkt$lan, pch = 16, cex = 0.7, col = "blue")
 
-legend(x = -183, y = -53,col = c("red","blue"), legend = c("aktywny uzytkownik","duz¹ liczb¹ lajków"),pch = 16)
+legend(x = -183, y = -53,col = c("red","blue"), legend = c("most active users","users with highest number of likes"),pch = 16)
 #Ranking miast
 miasta_najwieksza_ilosc_pkt <- najw_pkt %>% group_by(Location) %>% summarise(suma = sum(pkt)) %>% arrange(desc(suma)) %>% na.omit()
-miasta_najaaktywniejsi_uzytkownicy <- najaktywniejsi_urzytkownicy %>% group_by(Location) %>% summarise(suma = sum(ilosc)) %>%
+miasta_najaktywniejsi_uzytkownicy <- najaktywniejsi_uzytkownicy %>% group_by(Location) %>% summarise(suma = sum(ilosc)) %>%
   arrange(desc(suma)) %>% na.omit()
-miasta_najaaktywniejsi_uzytkownicy[1:10,]
+miasta_najaktywniejsi_uzytkownicy[1:10,]
 miasta_najwieksza_ilosc_pkt[1:10,]
 
 #Histogramy
@@ -67,11 +68,11 @@ Posts_czas <- as.numeric(format(as.Date(Posts$CreationDate, "%Y"),"%Y"))
 Comments_czas <- as.numeric(format(as.Date(Comments$CreationDate, "%Y"),"%Y"))
 
 par(mar = c(5,4.5,2.1,2))
-hist(Votes_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby lajków w latach",xlab= "Rok",
-     ylab = "Liczba lajków",las=1)
+hist(Votes_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby lajk?w w latach",xlab= "Rok",
+     ylab = "Liczba lajk?w",las=1)
 box()
-hist(Posts_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby dodawanych postów w latach",xlab= "Rok",
-     ylab = "Liczba dodanych postów",las=1)
+hist(Posts_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby dodawanych post?w w latach",xlab= "Rok",
+     ylab = "Liczba dodanych post?w",las=1)
 box()
 hist(Comments_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby dodawanych komentarzy w latach",xlab= "Rok",
      ylab = "Liczba dodanych komentarzy",las=1)
@@ -80,7 +81,7 @@ box()
 frequency <- freq_terms(Comments$Text, top = 10, stopwords = stopwords("en"))
 plot(frequency)
 
-#text-mining (baaaardzo elementarny), dany komentarz otrzymuje tak¹ emocje ktorej wiecej slow jest w jego tresci
+#text-mining (baaaardzo elementarny), dany komentarz otrzymuje tak? emocje ktorej wiecej slow jest w jego tresci
 df_on_list <- function(x){
   x <- data.frame(x)
   colnames(x) <- "word"
@@ -168,7 +169,7 @@ polarity_by_posts <-  polarity(
 polarity_by_posts$group[1:5,]
 polarity_comments$group[1:5,]
 
-polarity_by_sser <-  polarity(
+polarity_by_user <-  polarity(
   text.var       = Comments$Text,
   grouping.var   = Comments$UserId,
   polarity.frame = key.pol,
@@ -180,7 +181,7 @@ polarity_by_sser <-  polarity(
 par(mfrow = c(1,3))
 boxplot(polarity_comments$group$ave.polarity,pch = 16,main = "on every comment", col = "ivory2")
 boxplot(polarity_by_posts$group$ave.polarity,pch = 16, main = "by posts", col = "ivory3")
-boxplot(polarity_by_sser$group$ave.polarity,pch = 16, main = "by User", col = "ivory4")
+boxplot(polarity_by_user$group$ave.polarity,pch = 16, main = "by User", col = "ivory4")
 
 
 #word cloud
@@ -225,7 +226,7 @@ bigram_freq_post <- sort(rowSums(bigram_dtm_post), decreasing = TRUE)
 
 wordcloud(names(bigram_freq_post),bigram_freq_post,max.words = 20, col = "tan")
 
-#Popularnoœæ kawy
+#Popularno?? kawy
 #komentarze
 popular_coffee <- c("americano","latte", "cappuccino", "flat white", "long black", "mocchiato",
                    "piccolo latte","mochaccino","irish coffee","vienna","affogato")
