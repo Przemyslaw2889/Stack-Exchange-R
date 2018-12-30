@@ -1,7 +1,7 @@
 #dane do pobrania tutaj: ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
 source("df_from_xml.R")
 options(stringsAsFactors = FALSE)
-Posts <- xml_data_frame("data/coffee.stackexchange.com/Posts.xml")
+Posts <- read.csv("data/coffee.stackexchange.com/Posts.csv")
 #biblioteki
 library(qdap)
 library(tm)
@@ -11,6 +11,7 @@ library(textstem)
 library(randomForest)
 library(stringi)
 library(caret)
+library(dplyr)
 #stwrzenie zbioru testoweg i treningowego
 pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
 pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
@@ -35,7 +36,8 @@ for (i in 1:n){
 
 test <- data.frame(text = text_test,klasa = c(rep("positive",n),rep("negative",n)))
 
-#obrobka danych tekstowych, lematyzacja, zmiana na male liery, usuniecie znakw interpunkcyjnych itp
+
+#obrobka danych tekstowych, lematyzacja, zmiana na male liery, usuniecie znakow interpunkcyjnych itp
 data_train_test_post <- data.frame(text = c(train$text,test$text,Posts$Body),
                                    klasa = c(train$klasa,test$klasa,rep("post",nrow(Posts))),
                                    typ = c(rep("train",nrow(train)),rep("test",nrow(test)),rep("post",nrow(Posts))))
@@ -53,25 +55,40 @@ data_train_test_post_m <- create_matrix(data_train_test_post$text, language="eng
 data_train_test_post_m <- as.matrix(data_train_test_post_m)
 
 #budowa modelu(random forest), model dopasowany tylko na czesci danych ze wzgledu na czas, full
-classifier_full <- randomForest(data_train_test_post_m[1:3000,], as.factor(data_train_test_post$klasa[1:3000]) )
+#classifier_full <- randomForest(data_train_test_post_m[1:3000,], as.factor(data_train_test_post$klasa[1:3000]) )
 
-predicted <- predict(classifier_full, data_train_test_post_m[3000:4000,])
+#saveRDS(object = classifier_full, file = "rf_fulldata.rds")
 
+rf <- readRDS("rf_fulldata.rds")
+
+predicted <- predict(rf, data_train_test_post_m[3000:4000,])
 table(data_train_test_post[3000:4000,"klasa"], predicted)
 recall_accuracy(data_train_test_post[3000:4000,"klasa"], predicted)
 confusionMatrix(as.factor(data_train_test_post[3000:4000,"klasa"]), as.factor(predicted))
 
-saveRDS(object = classifier_full, file = "rf_fulldata.rds")
-
-
-rf <- readRDS("rf_fulldata.rds")
-
-
 #predykcja postow
-pred_post <- unname(predict(classifier_full ,newdata = data_train_test_post_m[4001:nrow(data_train_test_post_m),]))
+pred_post <- unname(predict(rf ,newdata = data_train_test_post_m[4001:nrow(data_train_test_post_m),]))
 table(pred_post)[[2]]/length(pred_post)
 
-#na podstawie tego bede chcia³ stworzyc wykresy
+#WYKRESY
 pred_post_df <- data.frame(pred = pred_post, creation_data = as.Date(Posts$CreationDate),last_activity_day = as.Date(Posts$LastActivityDate))
-pred_post_df$diff_time <- stri_extract_first_regex(pred_post_df$last_activity_day - pred_post_df$creation_data, "[0-9]+")
+pred_post_df$diff_time <- as.numeric(stri_extract_first_regex(pred_post_df$last_activity_day - pred_post_df$creation_data, "[0-9]+"))
+pred_post_df <- pred_post_df[order(pred_post_df$creation_data), ]
+
+
+positive_by_date <- pred_post_df %>% mutate(month = stri_datetime_format(creation_data, "yyyy-MM")) %>%  group_by(month) %>% 
+  summarize(pozytywne = sum(pred == "positive"), poz_procent = sum(pred == "positive")/n(), count = n())
+
+par(mfrow = c(2,1))
+x <- barplot(as.matrix(t(positive_by_date[,c("count","pozytywne")])), las = 1,col = c("red","lightblue"), xlab = "Month",beside = TRUE,
+             main = "Posts by month", ylim = c(0,300))
+box()
+legend("topright", legend = c("All posts", "Positive"), fill = c("red","lightblue"))
+axis(1, labels = positive_by_date$month[c(1,9,18,27,36,45)], at = (x[1,c(1,9,18,27,36,45)]+x[2,c(1,9,18,27,36,45)])/2 )
+
+
+y <- barplot(positive_by_date$poz_procent, xlab = "Month", ylim = c(0,1.1),
+             col = "tan", main = "% of positive posts", las = 1)
+box()
+axis(1, labels = positive_by_date$month[c(1,9,18,27,36,45)], at = y[c(1,9,18,27,36,45),1] )
 
