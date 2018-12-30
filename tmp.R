@@ -3,7 +3,11 @@ options(stringsAsFactors = FALSE)
 library(ggmap)
 library(stringi)
 library(maps)
+<<<<<<< HEAD
 library(dplyr)
+=======
+
+>>>>>>> refs/remotes/origin/master
 # Wszystkie dane mam wypakowane w folderze data
 Comments_beer <- xml_data_frame("data/beer.stackexchange.com/Comments.xml")
 Badges_beer <- xml_data_frame("data/beer.stackexchange.com/Badges.xml")
@@ -13,6 +17,7 @@ Users_beer <- xml_data_frame("data/beer.stackexchange.com/Users.xml")
 Tags_beer <- xml_data_frame("data/beer.stackexchange.com/Tags.xml")
 Votes_beer <- xml_data_frame("data/beer.stackexchange.com/Votes.xml")
 
+<<<<<<< HEAD
 Comments_gaming <- xml_data_frame("data/gaming.stackexchange.com/Comments.xml")
 Badges_gaming <- xml_data_frame("data/gaming.stackexchange.com/Badges.xml")
 PostsHistory_gaming <- xml_data_frame("data/gaming.stackexchange.com/PostHistory.xml")
@@ -20,6 +25,15 @@ Posts_gaming <- xml_data_frame("data/gaming.stackexchange.com/Posts.xml")
 Users_gaming <- xml_data_frame("data/gaming.stackexchange.com/Users.xml")
 Tags_gaming <- xml_data_frame("data/gaming.stackexchange.com/Tags.xml")
 Votes_gaming <- xml_data_frame("data/gaming.stackexchange.com/Votes.xml")
+=======
+Comments_poker <- xml_data_frame("data/poker.stackexchange.com/Comments.xml")
+Badges_poker <- xml_data_frame("data/poker.stackexchange.com/Badges.xml")
+PostsHistory_poker <- xml_data_frame("data/poker.stackexchange.com/PostHistory.xml")
+Posts_poker <- xml_data_frame("data/poker.stackexchange.com/Posts.xml")
+Users_poker <- xml_data_frame("data/poker.stackexchange.com/Users.xml")
+Tags_poker <- xml_data_frame("data/poker.stackexchange.com/Tags.xml")
+Votes_poker <- xml_data_frame("data/poker.stackexchange.com/Votes.xml")
+>>>>>>> refs/remotes/origin/master
 
 Comments_coffee <- xml_data_frame("data/coffee.stackexchange.com/Comments.xml")
 Badges_coffee <- xml_data_frame("data/coffee.stackexchange.com/Badges.xml")
@@ -32,7 +46,11 @@ Votes_coffee <- xml_data_frame("data/coffee.stackexchange.com/Votes.xml")
 lokacje <- function(lokalizacje){
   location <- strsplit(lokalizacje[stri_detect_regex(lokalizacje,",")], split = ",")
   location <- location[!is.na(location)]
+<<<<<<< HEAD
   lokalizacje <- matrix(unlist(lapply(location,function(x) geocode(x[1],source = "dsk"))),ncol = 2,byrow = TRUE)
+=======
+  lokalizacje <- matrix(unlist(lapply(location,function(x) geocode(x[1],source = "google"))),ncol = 2,byrow = TRUE)
+>>>>>>> refs/remotes/origin/master
   lokalizacje <- as.data.frame(lokalizacje)
   colnames(lokalizacje) <- c("lon","lan")
   lokalizacje
@@ -42,25 +60,39 @@ save_locations <- function(Users){
   save_name <- deparse(substitute(Users))
   save_name <- paste(save_name, "location", sep="_")
   file_name <- paste(save_name, "rds", sep=".")
+<<<<<<< HEAD
   print(file_name)
   if(!file.exists(file_name)){
     lokalizacje <- lokacje(Users$Location)
     
     saveRDS(lokalizacje, file=file_name)
+=======
+  file_path <- file.path("saved", file_name)
+  print(file_path)
+  if(!file.exists(file_path)){
+    lokalizacje <- lokacje(Users$Location)
+    
+    saveRDS(lokalizacje, file=file_path)
+>>>>>>> refs/remotes/origin/master
   } else{
     print("Locations already saved")
   }
 }
 
+<<<<<<< HEAD
 #beer
 #lokacje_beer <- lokacje(Users_beer$Location)
 #save_locations(Users_beer)
 #saveRDS(lokacje_beer, file="Users_beer_location.rds")
 
+=======
+save_locations(Users_beer)
+>>>>>>> refs/remotes/origin/master
 locations_beers <- readRDS("Users_beer_location.rds")
 
 par(mar=c(0,0,0,0))
 map('world',col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,mar=rep(0,4),border=0, ylim=c(-80,80),main ="mapa")
+<<<<<<< HEAD
 points(locations_beers$lon,locations_beers$lan,pch = 16,cex = 0.7, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.2))
 
 #coffee
@@ -124,4 +156,7 @@ points(lok_najw_pkt$lon,lok_najw_pkt$lan, pch = 16, cex = 0.7, col = "blue")
 legend(x = -183, y = -53,col = c("red","blue"), legend = c("most active users","users with highest number of likes"),pch = 16)
 
 
+=======
+points(lokalizacje$lon,lokalizacje$lan,pch = 16,cex = 0.7, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.2))
+>>>>>>> refs/remotes/origin/master
 

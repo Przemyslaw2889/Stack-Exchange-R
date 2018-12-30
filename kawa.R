@@ -88,7 +88,6 @@ df_on_list <- function(x){
   x
 }
 
-
 list <- as.list(tolower(Comments$Text))
 list <- lapply(list,stri_extract_all_regex,"[a-z]+")
 list <- lapply(list,df_on_list)
