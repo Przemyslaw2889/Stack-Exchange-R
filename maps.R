@@ -92,6 +92,23 @@ par(mar=c(0,0,0,0))
 map('world',col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,mar=rep(0,4),border=0, ylim=c(-80,80),main ="mapa")
 points(locations_beers$lon,locations_beers$lan,pch = 16,cex = 0.7, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.2))
 
+najaktywniejsi_uzytkownicy_beer<- Posts_beer %>% group_by(OwnerUserId) %>% summarise(ilosc = n()) %>% 
+  left_join(Users_beer,by = c("OwnerUserId" = "Id")) %>% select(ilosc,OwnerUserId, Location) %>% arrange(desc(ilosc)) %>% as.data.frame()
+
+lok_naj_aktyw_beer <- lokacje(najaktywniejsi_uzytkownicy_beer[1:20,"Location"])
+
+points(lok_naj_aktyw_beer$lon,lok_naj_aktyw_beer$lan, pch = 16, cex = 0.7, col = "red")
+
+najw_pkt_beer <- Posts_beer %>% group_by(OwnerUserId) %>% summarise(pkt = sum(as.numeric(Score))) %>% 
+  left_join(Users_beer,by = c("OwnerUserId" = "Id")) %>% select(pkt,OwnerUserId, Location) %>% arrange(desc(pkt)) %>% as.data.frame()
+
+lok_najw_pkt_beer <- lokacje(najw_pkt_beer$Location[1:10])
+
+points(lok_najw_pkt_beer$lon,lok_najw_pkt_beer$lan, pch = 16, cex = 0.7, col = "blue")
+
+legend(x = -183, y = -53,col = c("red","blue"), legend = c("most active users","users with highest number of likes"),pch = 16)
+
+title("Beer")
 
 ##### COFFEE
 par(mar=c(0,0,0,0))
@@ -144,6 +161,6 @@ lok_najw_pkt_gam <- lokacje(najw_pkt_gam$Location[1:10])
 points(lok_najw_pkt$lon,lok_najw_pkt$lan, pch = 16, cex = 0.7, col = "blue")
 
 legend(x = -183, y = -53,col = c("red","blue"), legend = c("most active users","users with highest number of likes"),pch = 16)
-
+title("Gaming")
 
 
