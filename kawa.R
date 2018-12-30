@@ -21,47 +21,6 @@ library(tm)
 library(wordcloud)
 library(qdap)
 
-#mapa
-lokacje <- function(lokalizacje){
-  location <- strsplit(lokalizacje[stri_detect_regex(lokalizacje,",")], split = ",")
-  location <- location[!is.na(location)]
-  lokalizacje <- matrix(unlist(lapply(location,function(x) geocode(x[1],source = "dsk"))),ncol = 2,byrow = TRUE)
-  lokalizacje <- as.data.frame(lokalizacje)
-  colnames(lokalizacje) <- c("lon","lan")
-  lokalizacje
-  }
-
-lokalizacje <- lokacje(Users$Location)
-saveRDS(lokalizacje, file="lokalizacje_kawa.rds")
-lokalizacje <- readRDS("lokalizacje_kawa.rds")
-
-par(mar=c(0,0,0,0))
-map('world',col="#f2f2f2", fill=TRUE, bg="white", lwd=0.05,mar=rep(0,4),border=0, ylim=c(-80,80),main ="mapa")
-points(lokalizacje$lon,lokalizacje$lan,pch = 16,cex = 0.7, col = rgb(red = 0, green = 0, blue = 0, alpha = 0.2))
-
-
-najaktywniejsi_uzytkownicy <- Posts %>% group_by(OwnerUserId) %>% summarise(ilosc = n()) %>% 
-  left_join(Users,by = c("OwnerUserId" = "Id")) %>% select(ilosc,OwnerUserId, Location) %>% arrange(desc(ilosc)) %>% as.data.frame()
-
-lok_naj_aktyw <- lokacje(najaktywniejsi_uzytkownicy[1:20,"Location"])
-
-points(lok_naj_aktyw$lon,lok_naj_aktyw$lan, pch = 16, cex = 0.7, col = "red")
-
-najw_pkt <- Posts %>% group_by(OwnerUserId) %>% summarise(pkt = sum(as.numeric(Score))) %>% 
-  left_join(Users,by = c("OwnerUserId" = "Id")) %>% select(pkt,OwnerUserId, Location) %>% arrange(desc(pkt)) %>% as.data.frame()
-
-lok_najw_pkt <- lokacje(najw_pkt$Location[1:10])
-
-points(lok_najw_pkt$lon,lok_najw_pkt$lan, pch = 16, cex = 0.7, col = "blue")
-
-legend(x = -183, y = -53,col = c("red","blue"), legend = c("most active users","users with highest number of likes"),pch = 16)
-#Ranking miast
-miasta_najwieksza_ilosc_pkt <- najw_pkt %>% group_by(Location) %>% summarise(suma = sum(pkt)) %>% arrange(desc(suma)) %>% na.omit()
-miasta_najaktywniejsi_uzytkownicy <- najaktywniejsi_uzytkownicy %>% group_by(Location) %>% summarise(suma = sum(ilosc)) %>%
-  arrange(desc(suma)) %>% na.omit()
-miasta_najaktywniejsi_uzytkownicy[1:10,]
-miasta_najwieksza_ilosc_pkt[1:10,]
-
 #Histogramy
 Votes_czas <- as.numeric(format(as.Date(Votes$CreationDate, "%Y"),"%Y"))
 Posts_czas <- as.numeric(format(as.Date(Posts$CreationDate, "%Y"),"%Y"))
@@ -87,6 +46,7 @@ df_on_list <- function(x){
   colnames(x) <- "word"
   x
 }
+
 
 list <- as.list(tolower(Comments$Text))
 list <- lapply(list,stri_extract_all_regex,"[a-z]+")
