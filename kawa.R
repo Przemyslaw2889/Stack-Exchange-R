@@ -2,13 +2,13 @@ source("df_from_xml.R")
 options(stringsAsFactors = FALSE)
 setwd("coffee.stackexchange.com/") 
 
-Comments <- xml_data_frame("Comments.xml")
-Badges <- xml_data_frame("Badges.xml")
-PostsHistory <- xml_data_frame("PostHistory.xml")
-Posts <- xml_data_frame("Posts.xml")
-Users <- xml_data_frame("Users.xml")
-Tags <- xml_data_frame("Tags.xml")
-Votes <- xml_data_frame("Votes.xml")
+Comments <- read.csv("data/coffee.stackexchange.com/Comments.csv")
+Badges <- read.csv("data/coffee.stackexchange.com/Badges.csv")
+PostsHistory <- read.csv("data/coffee.stackexchange.com/PostHistory.csv")
+Posts <- read.csv("data/coffee.stackexchange.com/Posts.csv")
+Users <- read.csv("data/coffee.stackexchange.com/Users.csv")
+Tags <- read.csv("data/coffee.stackexchange.com/Tags.csv")
+Votes <- read.csv("data/beer.stackexchange.com/Votes.csv")
 
 #biblioteki
 library(ggmap)
@@ -188,7 +188,7 @@ wordcloud(names(bigram_freq_post),bigram_freq_post,max.words = 20, col = "tan")
 #Popularno?? kawy
 #komentarze
 popular_coffee <- c("americano","latte", "cappuccino", "flat white", "long black", "mocchiato",
-                   "piccolo latte","mochaccino","irish coffee","vienna","affogato")
+                   "piccolo latte","mochaccino","irish coffee","vienna","affogato","espresso")
 clean_coments <- lapply(Comm_corp, "[",1)
 coffee_type_comm <- lapply(clean_coments, stri_detect_fixed, popular_coffee)
 coffee_type_comm <- as.data.frame(t(as.data.frame(coffee_type_comm)))
@@ -202,7 +202,7 @@ coffee_type_posts_body <- as.data.frame(t(as.data.frame(coffee_type_posts_body))
 colnames(coffee_type_posts_body) <- popular_coffee
 sum_coffee_type_posts <- colSums(coffee_type_posts_body)
 
-df_coffee_type <- data.frame(count = c(sum_coffee_type_comm,sum_coffee_type_posts), type = c(rep("comm",11),rep("body post",11)),
+df_coffee_type <- data.frame(count = c(sum_coffee_type_comm,sum_coffee_type_posts), type = c(rep("comm",12),rep("body post",12)),
                              coffee =  rep(popular_coffee,2))
 
 
