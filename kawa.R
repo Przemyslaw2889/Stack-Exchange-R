@@ -32,7 +32,7 @@ lokacje <- function(lokalizacje){
   }
 
 lokalizacje <- lokacje(Users$Location)
-#saveRDS(lokalizacje, file="lokalizacje_kawa.rds")
+saveRDS(lokalizacje, file="lokalizacje_kawa.rds")
 lokalizacje <- readRDS("lokalizacje_kawa.rds")
 
 par(mar=c(0,0,0,0))
