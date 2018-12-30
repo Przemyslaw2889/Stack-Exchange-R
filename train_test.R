@@ -1,7 +1,7 @@
 #dane do pobrania tutaj: ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
 source("df_from_xml.R")
 options(stringsAsFactors = FALSE)
-Posts <- xml_data_frame("coffee.stackexchange.com/Posts.xml")
+Posts <- xml_data_frame("data/coffee.stackexchange.com/Posts.xml")
 #biblioteki
 library(qdap)
 library(tm)
@@ -9,6 +9,8 @@ library(RTextTools)
 library(e1071)
 library(textstem)
 library(randomForest)
+library(stringi)
+library(caret)
 #stwrzenie zbioru testoweg i treningowego
 pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
 pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
@@ -50,17 +52,26 @@ data_train_test_post_m <- create_matrix(data_train_test_post$text, language="eng
 
 data_train_test_post_m <- as.matrix(data_train_test_post_m)
 
+#budowa modelu(random forest), model dopasowany tylko na czesci danych ze wzgledu na czas, full
+classifier_full <- randomForest(data_train_test_post_m[1:3000,], as.factor(data_train_test_post$klasa[1:3000]) )
 
-#budowa modelu(random forest), model dopasowany tylko na czesci danych ze wzgledu na czas
-classifier <- randomForest(data_train_test_post_m[1400:1600,], as.factor(data_train_test_post$klasa[1400:1600]) )
-
-predicted <- predict(classifier, data_train_test_post_m[3000:4000,])
+predicted <- predict(classifier_full, data_train_test_post_m[3000:4000,])
 
 table(data_train_test_post[3000:4000,"klasa"], predicted)
 recall_accuracy(data_train_test_post[3000:4000,"klasa"], predicted)
+confusionMatrix(as.factor(data_train_test_post[3000:4000,"klasa"]), as.factor(predicted))
+
+saveRDS(object = classifier_full, file = "rf_fulldata.rds")
+
+
+rf <- readRDS("rf_fulldata.rds")
 
 
 #predykcja postow
-pred_post <- unname(predict(classifier,newdata = data_train_test_post_m[4000:nrow(data_train_test_post_m),]))
-table(pred_post)
+pred_post <- unname(predict(classifier_full ,newdata = data_train_test_post_m[4001:nrow(data_train_test_post_m),]))
+table(pred_post)[[2]]/length(pred_post)
+
+#na podstawie tego bede chcia³ stworzyc wykresy
+pred_post_df <- data.frame(pred = pred_post, creation_data = as.Date(Posts$CreationDate),last_activity_day = as.Date(Posts$LastActivityDate))
+pred_post_df$diff_time <- stri_extract_first_regex(pred_post_df$last_activity_day - pred_post_df$creation_data, "[0-9]+")
 
