@@ -1,5 +1,5 @@
 #dane do pobrania tutaj: ai.stanford.edu/~amaas/data/sentiment/aclImdb_v1.tar.gz
-source("df_from_xml.R")
+#source("df_from_xml.R")
 options(stringsAsFactors = FALSE)
 Posts_coffee <- read.csv("data/coffee.stackexchange.com/Posts.csv")
 #biblioteki
@@ -12,6 +12,7 @@ library(randomForest)
 library(stringi)
 library(caret)
 library(dplyr)
+library(class)
 #stwrzenie zbioru testoweg i treningowego
 pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
 pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
@@ -62,13 +63,39 @@ data_train_test_post_m <- as.matrix(data_train_test_post_m)
 rf <- readRDS("rf_fulldata.rds")
 
 predicted <- predict(rf, data_train_test_post_m[3000:4000,])
-table(data_train_test_post[3000:4000,"klasa"], predicted)
-recall_accuracy(data_train_test_post[3000:4000,"klasa"], predicted)
-confusionMatrix(as.factor(data_train_test_post[3000:4000,"klasa"]), as.factor(predicted))
+table_full_model <- table(data_train_test_post[3000:4000,"klasa"], predicted)
+confusionMatrix_full_model <- confusionMatrix(as.factor(data_train_test_post[3000:4000,"klasa"]), as.factor(predicted))
+#na zbiorze testowym:
+#Accuracy : 0.8492,  Kappa : 0.6983, Sensitivity : 0.8646, Specificity : 0.8349
 
+###FETURE EXTRACTION
+var <- apply(data_train_test_post_m, 2, var)
+data_train_test_post_m <- data_train_test_post_m[,var > 0.001]
+#rf_high_var <- randomForest(data_train_test_post_m[1:3000,], as.factor(data_train_test_post$klasa[1:3000]) )
+
+#saveRDS(rf_high_var,"rf_high_var.rds")
+
+rf_high_var <- readRDS("rf_high_var.rds")
+
+pred_high_var <- predict(rf_high_var,data_train_test_post_m[3000:4000,])
+confMatr_high_var <- confusionMatrix(as.factor(data_train_test_post[3000:4000,"klasa"]), as.factor(pred_high_var))
+#tutaj mamy:
+#Accuracy : 0.8541, Kappa : 0.7083, Sensitivity : 0.8675, Specificity : 0.8417
+#uwzgledniajac  to ¿e zloznosc obliczeniowa jest duzo mniejsza
+#uwazam ze powinniœmy stosowaæ ten model, ale sproboje go ulepszyc, poprzez wybor zmiennych
+
+
+####knn
+#knn <- knn(train = data_train_test_post_m[1:3000,],test = data_train_test_post_m[3001:4000,],cl = data_train_test_post$klasa[1:3000], k = 7)
+#saveRDS(object = knn, file = "knn_coffee.rds")
+knn_pred <- readRDS("knn_coffee.rds")
+
+confusionMatrix(as.factor(data_train_test_post[3001:4000,"klasa"]), as.factor(knn_pred))
+#accuracy 64%, kappa 27.8%, Sensitivity : 0.6894, Specificity : 0.6098
+#wiec model odrzucamy
 
 #predykcja postow
-pred_post_coffee <- unname(predict(rf ,newdata = data_train_test_post_m[data_train_test_post$typ == "post_coffee",]))
+pred_post_coffee <- unname(predict(rf_high_var ,newdata = data_train_test_post_m[data_train_test_post$typ == "post_coffee",]))
 table(pred_post_coffee)[[2]]/length(pred_post_coffee)
 
 #WYKRESY
