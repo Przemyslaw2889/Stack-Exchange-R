@@ -20,7 +20,7 @@ library(tidytext)
 library(tm)
 library(wordcloud)
 library(qdap)
-
+library(RWeka)
 #Histogramy
 Votes_czas <- as.numeric(format(as.Date(Votes$CreationDate, "%Y"),"%Y"))
 Posts_czas <- as.numeric(format(as.Date(Posts$CreationDate, "%Y"),"%Y"))
@@ -175,7 +175,7 @@ tokenizer <- function(x){
 }
 
 bigram_dtm_comm <- as.matrix(TermDocumentMatrix(Comm_corp,control = list(tokenize = tokenizer) ))
-bigram_freq_comm <- sort(rowSums(bigram_dtm), decreasing = TRUE)
+bigram_freq_comm <- sort(rowSums(bigram_dtm_comm), decreasing = TRUE)
 
 wordcloud(names(bigram_freq_comm),bigram_freq_comm,max.words = 20, col = "tan")
 
@@ -185,7 +185,7 @@ bigram_freq_post <- sort(rowSums(bigram_dtm_post), decreasing = TRUE)
 
 wordcloud(names(bigram_freq_post),bigram_freq_post,max.words = 20, col = "tan")
 
-#Popularno?? kawy
+#Popularnosc kawy
 #komentarze
 popular_coffee <- c("americano","latte", "cappuccino", "flat white", "long black", "mocchiato",
                    "piccolo latte","mochaccino","irish coffee","vienna","affogato","espresso")
@@ -206,7 +206,8 @@ df_coffee_type <- data.frame(count = c(sum_coffee_type_comm,sum_coffee_type_post
                              coffee =  rep(popular_coffee,2))
 
 
-ggplot(df_coffee_type,aes(y = count, x = coffee, fill = type)) + geom_bar(stat="identity",position=position_dodge()) +
+ggplot(df_coffee_type,aes(y = count, x = reorder(coffee,-count), fill = type)) +
+  geom_bar(stat="identity",position=position_dodge()) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_fill_brewer(type = "seq",palette = "OrRd") +
   geom_text(aes(label=count), vjust=1.6, color="black",

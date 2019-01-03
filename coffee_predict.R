@@ -13,7 +13,7 @@ library(stringi)
 library(caret)
 library(dplyr)
 library(class)
-#stwrzenie zbioru testoweg i treningowego
+#stworzenie zbioru testoweg i treningowego
 pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
 pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
 n <- 1500
@@ -65,6 +65,10 @@ rf <- readRDS("rf_fulldata.rds")
 predicted <- predict(rf, data_train_test_post_m[3000:4000,])
 table_full_model <- table(data_train_test_post[3000:4000,"klasa"], predicted)
 confusionMatrix_full_model <- confusionMatrix(as.factor(data_train_test_post[3000:4000,"klasa"]), as.factor(predicted))
+predict(rf )
+
+slowa <- colnames(data_train_test_post_m)
+
 #na zbiorze testowym:
 #Accuracy : 0.8492,  Kappa : 0.6983, Sensitivity : 0.8646, Specificity : 0.8349
 
@@ -84,6 +88,14 @@ confMatr_high_var <- confusionMatrix(as.factor(data_train_test_post[3000:4000,"k
 #uwzgledniajac  to ¿e zloznosc obliczeniowa jest duzo mniejsza
 #uwazam ze powinniœmy stosowaæ ten model, ale sproboje go ulepszyc, poprzez wybor zmiennych
 
+
+
+#RFE
+x <- Sys.time()
+ctrl <- rfeControl(method = "cv",repeats = 1,verbose = FALSE)
+RFE <- rfe(data_train_test_post_m[1:3000,],as.factor(data_train_test_post$klasa[1:3000]), metric = "Accuracy", rfeControl = ctrl,
+           sizes = c(5000), maximize = TRUE)
+Sys.time-x
 
 ####knn
 #knn <- knn(train = data_train_test_post_m[1:3000,],test = data_train_test_post_m[3001:4000,],cl = data_train_test_post$klasa[1:3000], k = 7)
