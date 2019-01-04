@@ -88,15 +88,6 @@ confMatr_high_var <- confusionMatrix(as.factor(data_train_test_post[3000:4000,"k
 #uwzgledniajac  to ¿e zloznosc obliczeniowa jest duzo mniejsza
 #uwazam ze powinniœmy stosowaæ ten model, ale sproboje go ulepszyc, poprzez wybor zmiennych
 
-
-
-#RFE
-x <- Sys.time()
-ctrl <- rfeControl(method = "cv",repeats = 1,verbose = FALSE)
-RFE <- rfe(data_train_test_post_m[1:3000,],as.factor(data_train_test_post$klasa[1:3000]), metric = "Accuracy", rfeControl = ctrl,
-           sizes = c(5000), maximize = TRUE)
-Sys.time-x
-
 ####knn
 #knn <- knn(train = data_train_test_post_m[1:3000,],test = data_train_test_post_m[3001:4000,],cl = data_train_test_post$klasa[1:3000], k = 7)
 #saveRDS(object = knn, file = "knn_coffee.rds")
@@ -105,6 +96,30 @@ knn_pred <- readRDS("knn_coffee.rds")
 confusionMatrix(as.factor(data_train_test_post[3001:4000,"klasa"]), as.factor(knn_pred))
 #accuracy 64%, kappa 27.8%, Sensitivity : 0.6894, Specificity : 0.6098
 #wiec model odrzucamy
+
+
+
+########################WPROWADZANIE NOWYCH DANYCH I OCENA PRZEZ MODEL
+new_data <- function(x, names){
+  x <- lemmatize_strings(x)
+  x <- removePunctuation(x)
+  x <- tolower(x)
+  x <- removeWords(x,stopwords("en")) 
+  x <- stripWhitespace(x)
+  data <- matrix(data = 0,nrow = length(x),ncol = length(names))
+  for (i in 1:length(x)){
+   data[i,] <- stri_count_fixed(x[i],names,opts_fixed = NULL)
+  }
+  colnames(data) <- names
+  data
+}
+
+data <- c("i love unicorns", "i hate the world")
+words <- colnames(data_train_test_post_m)
+new_data_rf <- new_data(data,words)
+
+predict(rf,newdata = new_data_rf)
+
 
 #predykcja postow
 pred_post_coffee <- unname(predict(rf_high_var ,newdata = data_train_test_post_m[data_train_test_post$typ == "post_coffee",]))
