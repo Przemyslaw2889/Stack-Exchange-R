@@ -1,6 +1,5 @@
-source("df_from_xml.R")
+#source("df_from_xml.R")
 options(stringsAsFactors = FALSE)
-setwd("coffee.stackexchange.com/") 
 
 Comments <- read.csv("data/coffee.stackexchange.com/Comments.csv")
 Badges <- read.csv("data/coffee.stackexchange.com/Badges.csv")
@@ -11,7 +10,6 @@ Tags <- read.csv("data/coffee.stackexchange.com/Tags.csv")
 Votes <- read.csv("data/beer.stackexchange.com/Votes.csv")
 
 #biblioteki
-library(ggmap)
 library(stringi)
 library(tidytext)
 library(dplyr)
@@ -21,26 +19,27 @@ library(tm)
 library(wordcloud)
 library(qdap)
 library(RWeka)
-#Histogramy
-Votes_czas <- as.numeric(format(as.Date(Votes$CreationDate, "%Y"),"%Y"))
-Posts_czas <- as.numeric(format(as.Date(Posts$CreationDate, "%Y"),"%Y"))
-Comments_czas <- as.numeric(format(as.Date(Comments$CreationDate, "%Y"),"%Y"))
+library(wesanderson)
+library(reshape2)
 
-par(mar = c(5,4.5,2.1,2))
-hist(Votes_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby lajk?w w latach",xlab= "Rok",
-     ylab = "Liczba lajk?w",las=1)
-box()
-hist(Posts_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby dodawanych post?w w latach",xlab= "Rok",
-     ylab = "Liczba dodanych post?w",las=1)
-box()
-hist(Comments_czas,breaks = c(2014:2018),col = "lightblue",main = "Histogram liczby dodawanych komentarzy w latach",xlab= "Rok",
-     ylab = "Liczba dodanych komentarzy",las=1)
-box()
+#Histogramy
+Votes_czas <- data.frame(date = as.numeric(format(as.Date(Votes$CreationDate, "%Y"),"%Y"))) %>% group_by(date) %>%
+  summarise(liczba = n())
+Posts_czas <- data.frame(date = as.numeric(format(as.Date(Posts$CreationDate, "%Y"),"%Y"))) %>% group_by(date) %>%
+  summarise(liczba = n() )
+Comments_czas <- data.frame(date = as.numeric(format(as.Date(Comments$CreationDate, "%Y"),"%Y"))) %>% group_by(date) %>%
+  summarise(liczba = n())
+
+czas_all <- cbind(rbind(Votes_czas,Posts_czas,Comments_czas), typ = c(rep("votes",5),rep("Posts",4),rep("Comments",4)) )
+
+ggplot(czas_all, aes(x = date,y = liczba,fill = typ)) + geom_bar(stat="identity",position='dodge') 
+
 
 frequency <- freq_terms(Comments$Text, top = 10, stopwords = stopwords("en"))
 plot(frequency)
 
-#text-mining (baaaardzo elementarny), dany komentarz otrzymuje tak? emocje ktorej wiecej slow jest w jego tresci
+
+#text-mining (baaaardzo elementarny), dany komentarz otrzymuje taka emocje ktorej wiecej slow jest w jego tresci
 df_on_list <- function(x){
   x <- data.frame(x)
   colnames(x) <- "word"
@@ -64,29 +63,23 @@ from_df_to_vector <- function(x){
 }
 
 sentiment_vector <- unlist(lapply(list, from_df_to_vector))
+
+
 #emocje
 df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
 df_sentiment <- df_sentiment %>% group_by(emocja) %>%
   summarise(suma = sum(moc), liczba = n())
 
-par(oma = c(0,0,0,0))
-par(mar = c(6,4,3,2))
-plot(df_sentiment$suma, x = 1:10, type = "h", axes = FALSE,
-     ylab = '', col = "red",xlab = "", lwd = 2)
-axis(2,las = 1)
-axis(1,at = 1:10,labels = df_sentiment$names.sentiment_vector., las = 2)
-box()
-for (i in 1:length(df_sentiment$liczba)){
-  lines(c(i+0.2,i+0.2),c(0,df_sentiment$liczba[i]),lwd=2)
-}
+df_sentiment <- melt(df_sentiment,id.vars = "emocja")
 
-legend(x = 0.63, y = 5350,col = c("red","black"), legend = c("liczba","suma"),lty = 1,lwd = 2)
+ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w komentarzach")
+
 
 #positive
 pos_comment <- unnest_tokens(tbl = Comments,input = Text, output = word,to_lower = TRUE)[,c("Score","word","Id")] %>% 
   inner_join(get_sentiments("bing")) %>% filter(sentiment == "positive") %>% group_by(word) %>% summarise(count = n()) %>% 
   arrange(desc(count))
-
 
 #negative
 neg_comment <- unnest_tokens(tbl = Comments,input = Text, output = word,to_lower = TRUE)[,c("Score","word","Id")] %>% 
@@ -96,10 +89,13 @@ neg_comment <- unnest_tokens(tbl = Comments,input = Text, output = word,to_lower
 top_neg <- data.frame(count = -neg_comment$count[1:10],word = neg_comment$word[1:10])
 top_pos <- pos_comment[1:10,]
 
-top_word <- top_neg %>% union(top_pos) %>% arrange(count)
-barplot(top_word$count,col= c(rep("lightblue",10),rep("red",10)), las = 1, ylim = c(-220,450))
-axis(1,labels = top_word$word, at = seq(1,25,length.out = 20), las = 2)
-box()
+top_word <- top_neg %>% union(top_pos) %>% arrange(count) %>% mutate(grupa = as.factor(sign(count)))
+
+ggplot(top_word, aes(x = reorder(word,count), y = count, fill = grupa)) + geom_bar(stat="identity",position='dodge') + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("word") + 
+   scale_fill_brewer(type = "seq",palette = "Set1") +
+  theme(legend.position="none")
+
 
 #polarity
 
@@ -112,7 +108,6 @@ polarity_comments <-  polarity(
   deamplifiers   = deamplification.words 
 )
 
-length(unique(Comments$PostId))
 
 
 polarity_by_posts <-  polarity(
@@ -125,9 +120,6 @@ polarity_by_posts <-  polarity(
 )
 
 
-polarity_by_posts$group[1:5,]
-polarity_comments$group[1:5,]
-
 polarity_by_user <-  polarity(
   text.var       = Comments$Text,
   grouping.var   = Comments$UserId,
@@ -137,10 +129,17 @@ polarity_by_user <-  polarity(
   deamplifiers   = deamplification.words 
 )
 
-par(mfrow = c(1,3))
-boxplot(polarity_comments$group$ave.polarity,pch = 16,main = "on every comment", col = "ivory2")
-boxplot(polarity_by_posts$group$ave.polarity,pch = 16, main = "by posts", col = "ivory3")
-boxplot(polarity_by_user$group$ave.polarity,pch = 16, main = "by User", col = "ivory4")
+
+polarity <- data.frame(polarity = c(polarity_comments$group$ave.polarity,polarity_by_posts$group$ave.polarity,
+                                    polarity_by_user$group$ave.polarity), by = c(rep("comment_ID",
+                                                                                     length(polarity_comments$group$ave.polarity)),
+                                                                                 rep("post",
+                                                                                     length(polarity_by_posts$group$ave.polarity)),
+                                                                                 rep("user",
+                                                                                     length(polarity_by_user$group$ave.polarity))))
+
+ggplot(polarity,aes(y = polarity, x = by, color = by)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+                                                          outlier.size=2,outlier.alpha = 0.1)
 
 
 #word cloud
@@ -161,14 +160,18 @@ freq_word <- rowSums(tdm_comm)
 freq_word <- sort(freq_word, decreasing = TRUE)
 
 wordcloud(names(freq_word),freq_word ,max.words = 20, col = "tan")
+title("Wordcloud slow w tekscie komentarzy")
 
 Post_corp <- clean_corpus(VCorpus(VectorSource(Posts$Body)))
 tdm_post <- as.matrix(TermDocumentMatrix(Post_corp))
 freq_word_post <- sort(rowSums(tdm_post), decreasing = TRUE)
 
 wordcloud(names(freq_word_post),freq_word_post ,max.words = 20, col = "tan")
+title("Wordcloud slow w tekscie postow")
 
-#bigramy
+#BIGRAMY
+
+
 #komentarze
 tokenizer <- function(x){
   NGramTokenizer(x, Weka_control(min=2, max = 2) )
@@ -178,14 +181,16 @@ bigram_dtm_comm <- as.matrix(TermDocumentMatrix(Comm_corp,control = list(tokeniz
 bigram_freq_comm <- sort(rowSums(bigram_dtm_comm), decreasing = TRUE)
 
 wordcloud(names(bigram_freq_comm),bigram_freq_comm,max.words = 20, col = "tan")
+title("Wordcloud bigramow w tekscie komentarzy")
 
 #tresc postow
 bigram_dtm_post <- as.matrix(TermDocumentMatrix(Post_corp,control = list(tokenize = tokenizer) ))
 bigram_freq_post <- sort(rowSums(bigram_dtm_post), decreasing = TRUE)
 
 wordcloud(names(bigram_freq_post),bigram_freq_post,max.words = 20, col = "tan")
+title("Wordcloud bigramow w tekscie postow")
 
-#Popularnosc kawy
+#POPULARNOSC RODZAJOW KAWY
 #komentarze
 popular_coffee <- c("americano","latte", "cappuccino", "flat white", "long black", "mocchiato",
                    "piccolo latte","mochaccino","irish coffee","vienna","affogato","espresso")
@@ -205,10 +210,9 @@ sum_coffee_type_posts <- colSums(coffee_type_posts_body)
 df_coffee_type <- data.frame(count = c(sum_coffee_type_comm,sum_coffee_type_posts), type = c(rep("comm",12),rep("body post",12)),
                              coffee =  rep(popular_coffee,2))
 
-
 ggplot(df_coffee_type,aes(y = count, x = reorder(coffee,-count), fill = type)) +
   geom_bar(stat="identity",position=position_dodge()) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_fill_brewer(type = "seq",palette = "OrRd") +
   geom_text(aes(label=count), vjust=1.6, color="black",
-            position = position_dodge(0.9), size=3.5)
+            position = position_dodge(0.9), size=3.5) + xlab("coffee type")

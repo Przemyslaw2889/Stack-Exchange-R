@@ -13,6 +13,7 @@ library(stringi)
 library(caret)
 library(dplyr)
 library(class)
+library(reshape2)
 #stworzenie zbioru testoweg i treningowego
 pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
 pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
@@ -121,7 +122,8 @@ new_data_rf <- new_data(data,words)
 predict(rf,newdata = new_data_rf)
 
 
-#predykcja postow
+##########################PREDYKCJA POSTOW
+
 pred_post_coffee <- unname(predict(rf_high_var ,newdata = data_train_test_post_m[data_train_test_post$typ == "post_coffee",]))
 table(pred_post_coffee)[[2]]/length(pred_post_coffee)
 
@@ -135,6 +137,15 @@ pred_post_coffee_df <- pred_post_coffee_df[order(pred_post_coffee_df$creation_da
 
 positive_by_date <- pred_post_coffee_df %>% mutate(month = stri_datetime_format(creation_data, "yyyy-MM")) %>%  group_by(month) %>% 
   summarize(pozytywne = sum(pred == "positive"), poz_procent = sum(pred == "positive")/n(), count = n())
+
+positive_by_date_melt <- melt(data = positive_by_date[,c("count","pozytywne","month")], id.vars = "month")
+
+ggplot(positive_by_date_melt,aes(x = month, y = value, fill = variable)) + geom_bar(stat="identity",position=position_dodge())+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+
+
+
 
 par(mfrow = c(2,1))
 x <- barplot(as.matrix(t(positive_by_date[,c("count","pozytywne")])), las = 1,col = c("red","lightblue"), xlab = "Month",beside = TRUE,
