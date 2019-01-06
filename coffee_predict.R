@@ -15,17 +15,17 @@ library(dplyr)
 library(class)
 library(reshape2)
 #stworzenie zbioru testoweg i treningowego
-# pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
-# pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
-# n <- 1500
-# text <- numeric(2*n)
-# for (i in 1:n){
-#   text[i] <- readLines(pliki_pos[i])
-#   text[i+n] <- readLines(pliki_neg[i])
-# }
-# 
-# 
-# train <- data.frame(text = text, klasa = c(rep("positive",n),rep("negative",n)))
+pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
+pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
+n <- 1500
+text <- numeric(2*n)
+for (i in 1:n){
+ text[i] <- readLines(pliki_pos[i])
+ text[i+n] <- readLines(pliki_neg[i])
+}
+
+
+train <- data.frame(text = text, klasa = c(rep("positive",n),rep("negative",n)))
 
 #test trzeba wczytaæ zeby testowaæ na nim potem
 n <- 500
@@ -51,6 +51,9 @@ clean_text <- function(text){
   text <- stripWhitespace(text)
   text
 }
+
+
+data_train_test_post_m <- readRDS("data_train_test_post_m.rds")
 
 # data_train$text <- clean_text(data_train$text)
 # 
