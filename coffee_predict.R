@@ -15,18 +15,19 @@ library(dplyr)
 library(class)
 library(reshape2)
 #stworzenie zbioru testoweg i treningowego
-pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
-pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
-n <- 1500
-text <- numeric(2*n)
-for (i in 1:n){
-  text[i] <- readLines(pliki_pos[i])
-  text[i+n] <- readLines(pliki_neg[i])
-}
+# pliki_pos <- paste("data/train/pos/",list.files("data/train/pos/"),sep="")
+# pliki_neg <- paste("data/train/neg/",list.files("data/train/neg/"),sep="")
+# n <- 1500
+# text <- numeric(2*n)
+# for (i in 1:n){
+#   text[i] <- readLines(pliki_pos[i])
+#   text[i+n] <- readLines(pliki_neg[i])
+# }
+# 
+# 
+# train <- data.frame(text = text, klasa = c(rep("positive",n),rep("negative",n)))
 
-
-train <- data.frame(text = text, klasa = c(rep("positive",n),rep("negative",n)))
-
+#test trzeba wczytaæ zeby testowaæ na nim potem
 n <- 500
 test_pos <- paste("data/test/pos/",list.files("data/test/pos/"),sep = "")
 test_neg <- paste("data/test/neg/",list.files("data/test/neg/"),sep="")
@@ -40,9 +41,7 @@ test <- data.frame(text = text_test,klasa = c(rep("positive",n),rep("negative",n
 
 
 #obrobka danych tekstowych, lematyzacja, zmiana na male liery, usuniecie znakow interpunkcyjnych itp
-data_train_test_post <- data.frame(text = c(train$text,test$text,Posts_coffee$Body),
-                                   klasa = c(train$klasa,test$klasa,rep("post_coffee",nrow(Posts_coffee))),
-                                   typ = c(rep("train",nrow(train)),rep("test",nrow(test)),rep("post_coffee",nrow(Posts_coffee))))
+# data_train <- data.frame(text = train$text)
 
 clean_text <- function(text){
   text <- lemmatize_strings(text)
@@ -53,13 +52,16 @@ clean_text <- function(text){
   text
 }
 
-data_train_test_post$text <- clean_text(data_train_test_post$text)
+# data_train$text <- clean_text(data_train$text)
+# 
+# data_train_m <- create_matrix(data_train$text, language="english", 
+#                       removeStopwords=TRUE, removeNumbers=TRUE, 
+#                       stemWords = FALSE,removePunctuation = TRUE,toLower = TRUE,stripWhitespace = TRUE) 
+# 
+# data_train_m <- as.matrix(data_train_m)
+# saveRDS(data_train_m,"data_train_m.rds")
 
-data_train_test_post_m <- create_matrix(data_train_test_post$text, language="english", 
-                      removeStopwords=TRUE, removeNumbers=TRUE, 
-                      stemWords = FALSE,removePunctuation = TRUE,toLower = TRUE,stripWhitespace = TRUE) 
-
-data_train_test_post_m <- as.matrix(data_train_test_post_m)
+data_train_m <- readRDS("data_train_m.rds")
 
 #budowa modelu(random forest), model dopasowany tylko na czesci danych ze wzgledu na czas, full
 #classifier_full <- randomForest(data_train_test_post_m[1:3000,], as.factor(data_train_test_post$klasa[1:3000]) )
