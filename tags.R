@@ -10,7 +10,6 @@ tags_barplot <- function(Tags, k=10, ...){
   # Przejrzymy najpierw jakie sa popularne tagi
   popular_tags <- Tags%>% 
     arrange(desc(Count)) %>% head(k)
-  
   # Barplot tagow
   counts <- table(popular_tags$Count)
   opt <- par(mai=c(1,2.5,1,1))
@@ -23,7 +22,6 @@ tags_barplot <- function(Tags, k=10, ...){
 
 tags_barplot_name <- function(name, k=10, ...){
   tags = list(coffee=Tags_coffee, beer=Tags_beer, gaming=Tags_gaming)
-  print(name)
-  tags_barplot(tags[[name]])
+  tags_barplot(tags[[name]], k, ...)
 }
 
