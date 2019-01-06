@@ -21,7 +21,8 @@ library(qdap)
 library(RWeka)
 library(wesanderson)
 library(reshape2)
-
+library(ggplot2)
+library(textstem)
 #Histogramy
 Votes_czas <- data.frame(date = as.numeric(format(as.Date(Votes$CreationDate, "%Y"),"%Y"))) %>% group_by(date) %>%
   summarise(liczba = n())
@@ -34,23 +35,39 @@ czas_all <- cbind(rbind(Votes_czas,Posts_czas,Comments_czas), typ = c(rep("votes
 
 ggplot(czas_all, aes(x = date,y = liczba,fill = typ)) + geom_bar(stat="identity",position='dodge') 
 
-
+#frequency word plot
+#comments
 frequency <- freq_terms(Comments$Text, top = 10, stopwords = stopwords("en"))
+plot(frequency)
+#posts
+frequency <- freq_terms(Posts$Body, top = 10, stopwords = stopwords("en"))
 plot(frequency)
 
 
 #text-mining (baaaardzo elementarny), dany komentarz otrzymuje taka emocje ktorej wiecej slow jest w jego tresci
-df_on_list <- function(x){
-  x <- data.frame(x)
-  colnames(x) <- "word"
-  x
+
+clean_text <- function(text){
+  text <- lemmatize_strings(text)
+  text <- removePunctuation(text)
+  text <- tolower(text)
+  text <- removeWords(text,stopwords("en"))
+  text <- stripWhitespace(text)
+  text
 }
 
 
-list <- as.list(tolower(Comments$Text))
-list <- lapply(list,stri_extract_all_regex,"[a-z]+")
-list <- lapply(list,df_on_list)
-list <- lapply(list, function(x){
+############KOMENTARZE
+comment_clean <- clean_text(Comments$Text)
+
+comment_list <- as.list(comment_clean)
+comment_list <- lapply(comment_list,stri_extract_all_regex, "[a-z]+")
+comment_list <- lapply(comment_list,function(x){
+  x <- data.frame(word = x)
+  colnames(x) <- "word"
+  x
+})
+
+list <- lapply(comment_list, function(x){
   x %>%
     inner_join(data.frame(get_sentiments("nrc")),by = "word") %>% 
     group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
@@ -75,7 +92,45 @@ df_sentiment <- melt(df_sentiment,id.vars = "emocja")
 ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w komentarzach")
 
+#POSTY
+comment_clean <- clean_text(Posts$Body)
 
+comment_list <- as.list(comment_clean)
+comment_list <- lapply(comment_list,stri_extract_all_regex, "[a-z]+")
+comment_list <- lapply(comment_list,function(x){
+  x <- data.frame(word = x)
+  colnames(x) <- "word"
+  x
+})
+
+list <- lapply(comment_list, function(x){
+  x %>%
+    inner_join(data.frame(get_sentiments("nrc")),by = "word") %>% 
+    group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
+})
+
+from_df_to_vector <- function(x){
+  vec <- x[,2]
+  names(vec) <- x[,1]
+  vec
+}
+
+sentiment_vector <- unlist(lapply(list, from_df_to_vector))
+
+
+#emocje
+df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
+df_sentiment <- df_sentiment %>% group_by(emocja) %>%
+  summarise(suma = sum(moc), liczba = n())
+
+df_sentiment <- melt(df_sentiment,id.vars = "emocja")
+
+ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w tresci postow")
+
+
+########CZESTO UZYWANE SLOWA
+###KOMENTARZE
 #positive
 pos_comment <- unnest_tokens(tbl = Comments,input = Text, output = word,to_lower = TRUE)[,c("Score","word","Id")] %>% 
   inner_join(get_sentiments("bing")) %>% filter(sentiment == "positive") %>% group_by(word) %>% summarise(count = n()) %>% 
@@ -94,7 +149,30 @@ top_word <- top_neg %>% union(top_pos) %>% arrange(count) %>% mutate(grupa = as.
 ggplot(top_word, aes(x = reorder(word,count), y = count, fill = grupa)) + geom_bar(stat="identity",position='dodge') + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("word") + 
    scale_fill_brewer(type = "seq",palette = "Set1") +
-  theme(legend.position="none")
+  theme(legend.position="none") + labs(title = "Najczesciej uzywane pozytywne i negatywne slowa")
+
+
+###POSTY
+#positive
+pos_post <- unnest_tokens(tbl = Posts,input = Body, output = word,to_lower = TRUE)[,c("Score","word","Id")] %>% 
+  inner_join(get_sentiments("bing")) %>% filter(sentiment == "positive") %>% group_by(word) %>% summarise(count = n()) %>% 
+  arrange(desc(count))
+
+#negative
+neg_post <- unnest_tokens(tbl = Posts,input = Body, output = word,to_lower = TRUE)[,c("Score","word","Id")] %>% 
+  inner_join(get_sentiments("bing")) %>% filter(sentiment == "negative") %>% group_by(word) %>% summarise(count = n()) %>% 
+  arrange(desc(count))
+
+top_neg_post <- data.frame(count = -neg_post$count[1:10],word = neg_post$word[1:10])
+top_pos_post <- pos_comment[1:10,]
+
+top_word_post <- top_neg_post %>% union(top_pos_post) %>% arrange(count) %>% mutate(grupa = as.factor(sign(count)))
+
+ggplot(top_word_post, aes(x = reorder(word,count), y = count, fill = grupa)) + geom_bar(stat="identity",position='dodge') + 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("word") + 
+  scale_fill_brewer(type = "seq",palette = "Set1") +
+  theme(legend.position="none") + labs(title = "Najczesciej uzywane pozytywne i negatywne slowa")
+
 
 
 #polarity
