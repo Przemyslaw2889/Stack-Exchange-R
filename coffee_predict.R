@@ -44,11 +44,16 @@ data_train_test_post <- data.frame(text = c(train$text,test$text,Posts_coffee$Bo
                                    klasa = c(train$klasa,test$klasa,rep("post_coffee",nrow(Posts_coffee))),
                                    typ = c(rep("train",nrow(train)),rep("test",nrow(test)),rep("post_coffee",nrow(Posts_coffee))))
 
-data_train_test_post$text <- lemmatize_strings(data_train_test_post$text)
-data_train_test_post$text <- removePunctuation(data_train_test_post$text)
-data_train_test_post$text <- tolower(data_train_test_post$text)
-data_train_test_post$text <- removeWords(data_train_test_post$text,stopwords("en"))
-data_train_test_post$text <- stripWhitespace(data_train_test_post$text)
+clean_text <- function(text){
+  text <- lemmatize_strings(text)
+  text <- removePunctuation(text)
+  text <- tolower(text)
+  text <- removeWords(text,stopwords("en"))
+  text <- stripWhitespace(text)
+  text
+}
+
+data_train_test_post$text <- clean_text(data_train_test_post$text)
 
 data_train_test_post_m <- create_matrix(data_train_test_post$text, language="english", 
                       removeStopwords=TRUE, removeNumbers=TRUE, 
@@ -67,8 +72,6 @@ predicted <- predict(rf, data_train_test_post_m[3000:4000,])
 table_full_model <- table(data_train_test_post[3000:4000,"klasa"], predicted)
 confusionMatrix_full_model <- confusionMatrix(as.factor(data_train_test_post[3000:4000,"klasa"]), as.factor(predicted))
 predict(rf )
-
-slowa <- colnames(data_train_test_post_m)
 
 #na zbiorze testowym:
 #Accuracy : 0.8492,  Kappa : 0.6983, Sensitivity : 0.8646, Specificity : 0.8349
