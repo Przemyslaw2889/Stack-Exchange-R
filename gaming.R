@@ -104,39 +104,46 @@ ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable))
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w komentarzach")
 
 #POSTY
-comment_clean <- clean_text(Posts$Body)
+#comment_clean <- clean_text(Posts$Body)
 
-comment_list <- as.list(comment_clean)
-comment_list <- lapply(comment_list,stri_extract_all_regex, "[a-z]+")
-comment_list <- lapply(comment_list,function(x){
-  x <- data.frame(word = x)
-  colnames(x) <- "word"
-  x
-})
+#saveRDS(comment_clean, "gaming_post_clean.rds")
 
-list <- lapply(comment_list, function(x){
-  x %>%
-    inner_join(data.frame(get_sentiments("nrc")),by = "word") %>% 
-    group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
-})
+Posts$Body <- readRDS("gaming_post_clean.rds")
+# 
+# comment_list <- as.list(comment_clean)
+# comment_list <- lapply(comment_list,stri_extract_all_regex, "[a-z]+")
+# comment_list <- lapply(comment_list,function(x){
+#   x <- data.frame(word = x)
+#   colnames(x) <- "word"
+#   x
+# })
+# 
+# list <- lapply(comment_list, function(x){
+#   x %>%
+#     inner_join(data.frame(get_sentiments("nrc")),by = "word") %>% 
+#     group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
+# })
+# 
+# from_df_to_vector <- function(x){
+#   vec <- x[,2]
+#   names(vec) <- x[,1]
+#   vec
+# }
+# 
+# sentiment_vector <- unlist(lapply(list, from_df_to_vector))
+# 
+# 
+# #emocje
+# df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
+# df_sentiment <- df_sentiment %>% group_by(emocja) %>%
+#   summarise(suma = sum(moc), liczba = n())
 
-from_df_to_vector <- function(x){
-  vec <- x[,2]
-  names(vec) <- x[,1]
-  vec
-}
+#df_sentiment <- melt(df_sentiment,id.vars = "emocja")
+#saveRDS(df_sentiment,"df_sentiment_gaming_post.rds")
 
-sentiment_vector <- unlist(lapply(list, from_df_to_vector))
+df_post <- readRDS("df_sentiment_gaming_post.rds")
 
-
-#emocje
-df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
-df_sentiment <- df_sentiment %>% group_by(emocja) %>%
-  summarise(suma = sum(moc), liczba = n())
-
-df_sentiment <- melt(df_sentiment,id.vars = "emocja")
-
-ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
+ggplot(df_post,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w tresci postow")
 
 
