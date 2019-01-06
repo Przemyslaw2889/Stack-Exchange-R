@@ -15,9 +15,10 @@ clean_html <- function(texts){
   texts
 }
 
-create_clean_matrix <- function(text){
+create_clean_matrix <- function(text, lemmatize=FALSE){
   text <- clean_html(text);  print("Cleaning HTML: done")
-  text <- lemmatize_strings(text); print("Lemmatization: done ")
+  if(lemmatize)
+    text <- lemmatize_strings(text); print("Lemmatization: done ")
   text <- removePunctuation(text); print("Removing punctuation: done")
   text <- tolower(text)
   text <- removeWords(text,stopwords("en"))
@@ -36,17 +37,21 @@ create_clean_matrix <- function(text){
 
 Posts_coffee <- read.csv("data/coffee.stackexchange.com/Posts.csv")
 Posts_gaming <- read.csv("data/gaming.stackexchange.com/Posts.csv")
-texts <- Posts_coffee$Body
+Posts_beer <- read.csv("data/beer.stackexchange.com/Posts.csv")
+
+texts <- Posts_beer$Body
 text_matrix <- create_clean_matrix(texts)
 
-n_topics <- 2
+n_topics <- 3
+
 topic_lda <- LDA(text_matrix, k=n_topics, control=list(seed=42))
 summary(topic_lda)
 topic_lda
 topics <- tidy(topic_lda, matrix = "beta")
-topics %>% group_by(topic) %>% top_n(n=15, wt=beta) %>% arrange(topic, desc(beta))
 
-topics %>% filter(topic==1) %>% arrange(desc(beta))
-topics %>% filter(topic==2) %>% arrange(desc(beta))
+# Wyswietlamy slowa odpowiadajace kazdemu topicowi
+topics %>% filter(topic==1) %>% arrange(desc(beta)) %>% head(15)
+topics %>% filter(topic==2) %>% arrange(desc(beta)) %>% head(15)
+topics %>% filter(topic==3) %>% arrange(desc(beta)) %>% head(15)
 
 
