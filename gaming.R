@@ -193,46 +193,50 @@ ggplot(top_word_post, aes(x = reorder(word,count), y = count, fill = grupa)) + g
 
 #polarity
 
-polarity_comments <-  polarity(
-  text.var       = Comments$Text,
-  grouping.var   = Comments$Id,
-  polarity.frame = key.pol,
-  negators       = negation.words,
-  amplifiers     = amplification.words,
-  deamplifiers   = deamplification.words 
-)
+# polarity_comments <-  polarity(
+#   text.var       = Comments$Text,
+#   grouping.var   = Comments$Id,
+#   polarity.frame = key.pol,
+#   negators       = negation.words,
+#   amplifiers     = amplification.words,
+#   deamplifiers   = deamplification.words 
+# )
+# 
+# 
+# 
+# polarity_by_posts <-  polarity(
+#   text.var       = Comments$Text,
+#   grouping.var   = Comments$PostId,
+#   polarity.frame = key.pol,
+#   negators       = negation.words,
+#   amplifiers     = amplification.words,
+#   deamplifiers   = deamplification.words 
+# )
+# 
+# 
+# polarity_by_user <-  polarity(
+#   text.var       = Comments$Text,
+#   grouping.var   = Comments$UserId,
+#   polarity.frame = key.pol,
+#   negators       = negation.words,
+#   amplifiers     = amplification.words,
+#   deamplifiers   = deamplification.words 
+# )
+# 
+# 
+# polarity <- data.frame(polarity = c(polarity_comments$group$ave.polarity,polarity_by_posts$group$ave.polarity,
+#                                     polarity_by_user$group$ave.polarity), by = c(rep("comment_ID",
+#                                                                                      length(polarity_comments$group$ave.polarity)),
+#                                                                                  rep("post",
+#                                                                                      length(polarity_by_posts$group$ave.polarity)),
+#                                                                                  rep("user",
+#                                                                                      length(polarity_by_user$group$ave.polarity))))
+# 
+saveRDS(polarity,"polarity_gaming.rds")
 
+polarity_gaming <- readRDS("polarity_gaming.rds")
 
-
-polarity_by_posts <-  polarity(
-  text.var       = Comments$Text,
-  grouping.var   = Comments$PostId,
-  polarity.frame = key.pol,
-  negators       = negation.words,
-  amplifiers     = amplification.words,
-  deamplifiers   = deamplification.words 
-)
-
-
-polarity_by_user <-  polarity(
-  text.var       = Comments$Text,
-  grouping.var   = Comments$UserId,
-  polarity.frame = key.pol,
-  negators       = negation.words,
-  amplifiers     = amplification.words,
-  deamplifiers   = deamplification.words 
-)
-
-
-polarity <- data.frame(polarity = c(polarity_comments$group$ave.polarity,polarity_by_posts$group$ave.polarity,
-                                    polarity_by_user$group$ave.polarity), by = c(rep("comment_ID",
-                                                                                     length(polarity_comments$group$ave.polarity)),
-                                                                                 rep("post",
-                                                                                     length(polarity_by_posts$group$ave.polarity)),
-                                                                                 rep("user",
-                                                                                     length(polarity_by_user$group$ave.polarity))))
-
-ggplot(polarity,aes(y = polarity, x = by, color = by)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+ggplot(polarity_gaming,aes(y = polarity, x = by, color = by)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
                                                                       outlier.size=2,outlier.alpha = 0.1)
 
 
