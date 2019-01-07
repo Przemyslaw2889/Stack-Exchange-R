@@ -53,7 +53,7 @@ clean_text <- function(text){
 }
 
 
-data_train_test_post_m <- readRDS("data_train_test_post_m.rds")
+#data_train_test_post_m <- readRDS("data_train_test_post_m.rds")
 
 # data_train$text <- clean_text(data_train$text)
 # 
@@ -66,20 +66,42 @@ data_train_test_post_m <- readRDS("data_train_test_post_m.rds")
 
 data_train_m <- readRDS("data_train_m.rds")
 
-#budowa modelu(random forest), model dopasowany tylko na czesci danych ze wzgledu na czas, full
-#classifier_full <- randomForest(data_train_test_post_m[1:3000,], as.factor(data_train_test_post$klasa[1:3000]) )
+#budowa modelu(random forest), full
+#classifier_full <- randomForest(data_train_m, as.factor(train$klasa))
 
 #saveRDS(object = classifier_full, file = "rf_fulldata.rds")
 
 rf <- readRDS("rf_fulldata.rds")
 
-predicted <- predict(rf, data_train_test_post_m[3000:4000,])
-table_full_model <- table(data_train_test_post[3000:4000,"klasa"], predicted)
-confusionMatrix_full_model <- confusionMatrix(as.factor(data_train_test_post[3000:4000,"klasa"]), as.factor(predicted))
-predict(rf )
 
-#na zbiorze testowym:
-#Accuracy : 0.8492,  Kappa : 0.6983, Sensitivity : 0.8646, Specificity : 0.8349
+
+
+########################WPROWADZANIE NOWYCH DANYCH I OCENA PRZEZ MODEL
+new_data <- function(x, names){
+  x <- lemmatize_strings(x)
+  x <- removePunctuation(x)
+  x <- tolower(x)
+  x <- removeWords(x,stopwords("en")) 
+  x <- stripWhitespace(x)
+  data <- matrix(data = 0,nrow = length(x),ncol = length(names))
+  for (i in 1:length(x)){
+    data[i,] <- stri_count_fixed(x[i],names,opts_fixed = NULL)
+  }
+  colnames(data) <- names
+  data
+}
+
+data <- c("i love unicorns", "i hate the world")
+words <- colnames(data_train_m)
+new_data_rf <- new_data(test$text,words)
+
+
+predicted <- predict(rf,newdata = new_data_rf)
+table_full_model <- table(test$klasa, predicted)
+confusionMatrix_full_model <- confusionMatrix(as.factor(test$klasa), as.factor(predicted))
+#Accuracy : 0.872, Kappa : 0.744, Sensitivity : 0.8735, Specificity : 0.8705
+
+
 
 ###FETURE EXTRACTION
 var <- apply(data_train_test_post_m, 2, var)
@@ -106,28 +128,6 @@ confusionMatrix(as.factor(data_train_test_post[3001:4000,"klasa"]), as.factor(kn
 #accuracy 64%, kappa 27.8%, Sensitivity : 0.6894, Specificity : 0.6098
 #wiec model odrzucamy
 
-
-
-########################WPROWADZANIE NOWYCH DANYCH I OCENA PRZEZ MODEL
-new_data <- function(x, names){
-  x <- lemmatize_strings(x)
-  x <- removePunctuation(x)
-  x <- tolower(x)
-  x <- removeWords(x,stopwords("en")) 
-  x <- stripWhitespace(x)
-  data <- matrix(data = 0,nrow = length(x),ncol = length(names))
-  for (i in 1:length(x)){
-   data[i,] <- stri_count_fixed(x[i],names,opts_fixed = NULL)
-  }
-  colnames(data) <- names
-  data
-}
-
-data <- c("i love unicorns", "i hate the world")
-words <- colnames(data_train_test_post_m)
-new_data_rf <- new_data(data,words)
-
-predict(rf,newdata = new_data_rf)
 
 
 ##########################PREDYKCJA POSTOW
