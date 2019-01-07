@@ -86,7 +86,10 @@ sentiment_vector <- unlist(lapply(list, from_df_to_vector))
 #emocje
 df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
 df_sentiment <- df_sentiment %>% group_by(emocja) %>%
-  summarise(suma = sum(moc), liczba = n())
+  summarise(suma = sum(moc), liczba_komentarzy = n())
+df_sentiment$suma = df_sentiment$suma/(sum(df_sentiment$suma))
+df_sentiment$liczba_komentarzy = df_sentiment$liczba_komentarzy/(sum(df_sentiment$liczba_komentarzy))
+
 
 df_sentiment <- melt(df_sentiment,id.vars = "emocja")
 
@@ -122,7 +125,11 @@ sentiment_vector <- unlist(lapply(list, from_df_to_vector))
 #emocje
 df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
 df_sentiment <- df_sentiment %>% group_by(emocja) %>%
-  summarise(suma = sum(moc), liczba = n())
+  summarise(suma = sum(moc), liczba_postow = n())
+
+df_sentiment$suma = df_sentiment$suma/(sum(df_sentiment$suma))
+df_sentiment$liczba_postow = df_sentiment$liczba_postow/(sum(df_sentiment$liczba_postow))
+
 
 df_sentiment <- melt(df_sentiment,id.vars = "emocja")
 
@@ -177,46 +184,49 @@ ggplot(top_word_post, aes(x = reorder(word,count), y = count, fill = grupa)) + g
 
 
 #polarity
+# 
+# polarity_comments <-  polarity(
+#   text.var       = Comments$Text,
+#   grouping.var   = Comments$Id,
+#   polarity.frame = key.pol,
+#   negators       = negation.words,
+#   amplifiers     = amplification.words,
+#   deamplifiers   = deamplification.words 
+# )
+# 
+# 
+# 
+# polarity_by_posts <-  polarity(
+#   text.var       = Comments$Text,
+#   grouping.var   = Comments$PostId,
+#   polarity.frame = key.pol,
+#   negators       = negation.words,
+#   amplifiers     = amplification.words,
+#   deamplifiers   = deamplification.words 
+# )
+# 
+# 
+# polarity_by_user <-  polarity(
+#   text.var       = Comments$Text,
+#   grouping.var   = Comments$UserId,
+#   polarity.frame = key.pol,
+#   negators       = negation.words,
+#   amplifiers     = amplification.words,
+#   deamplifiers   = deamplification.words 
+# )
+# 
+# 
+# polarity <- data.frame(polarity = c(polarity_comments$group$ave.polarity,polarity_by_posts$group$ave.polarity,
+#                                     polarity_by_user$group$ave.polarity), by = c(rep("comment_ID",
+#                                                                                      length(polarity_comments$group$ave.polarity)),
+#                                                                                  rep("post",
+#                                                                                      length(polarity_by_posts$group$ave.polarity)),
+#                                                                                  rep("user",
+#                                                                                      length(polarity_by_user$group$ave.polarity))))
 
-polarity_comments <-  polarity(
-  text.var       = Comments$Text,
-  grouping.var   = Comments$Id,
-  polarity.frame = key.pol,
-  negators       = negation.words,
-  amplifiers     = amplification.words,
-  deamplifiers   = deamplification.words 
-)
+#saveRDS(polarity,"polarity_beer.rds")
 
-
-
-polarity_by_posts <-  polarity(
-  text.var       = Comments$Text,
-  grouping.var   = Comments$PostId,
-  polarity.frame = key.pol,
-  negators       = negation.words,
-  amplifiers     = amplification.words,
-  deamplifiers   = deamplification.words 
-)
-
-
-polarity_by_user <-  polarity(
-  text.var       = Comments$Text,
-  grouping.var   = Comments$UserId,
-  polarity.frame = key.pol,
-  negators       = negation.words,
-  amplifiers     = amplification.words,
-  deamplifiers   = deamplification.words 
-)
-
-
-polarity <- data.frame(polarity = c(polarity_comments$group$ave.polarity,polarity_by_posts$group$ave.polarity,
-                                    polarity_by_user$group$ave.polarity), by = c(rep("comment_ID",
-                                                                                     length(polarity_comments$group$ave.polarity)),
-                                                                                 rep("post",
-                                                                                     length(polarity_by_posts$group$ave.polarity)),
-                                                                                 rep("user",
-                                                                                     length(polarity_by_user$group$ave.polarity))))
-
+polarity <- readRDS("polarity_beer.rds")
 ggplot(polarity,aes(y = polarity, x = by, color = by)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
                                                                       outlier.size=2,outlier.alpha = 0.1)
 
@@ -268,29 +278,3 @@ bigram_freq_post <- sort(rowSums(bigram_dtm_post), decreasing = TRUE)
 wordcloud(names(bigram_freq_post),bigram_freq_post,max.words = 20, col = "tan")
 title("Wordcloud bigramow w tekscie postow")
 
-#POPULARNOSC RODZAJOW KAWY
-#komentarze
-popular_coffee <- c("americano","latte", "cappuccino", "flat white", "long black", "mocchiato",
-                    "piccolo latte","mochaccino","irish coffee","vienna","affogato","espresso")
-clean_coments <- lapply(Comm_corp, "[",1)
-coffee_type_comm <- lapply(clean_coments, stri_detect_fixed, popular_coffee)
-coffee_type_comm <- as.data.frame(t(as.data.frame(coffee_type_comm)))
-colnames(coffee_type_comm) <- popular_coffee
-sum_coffee_type_comm <- colSums(coffee_type_comm)
-
-#tresc postow
-clean_posts_body <- lapply(Post_corp, "[",1)
-coffee_type_posts_body <- lapply(clean_posts_body, stri_detect_fixed, popular_coffee)
-coffee_type_posts_body <- as.data.frame(t(as.data.frame(coffee_type_posts_body)))
-colnames(coffee_type_posts_body) <- popular_coffee
-sum_coffee_type_posts <- colSums(coffee_type_posts_body)
-
-df_coffee_type <- data.frame(count = c(sum_coffee_type_comm,sum_coffee_type_posts), type = c(rep("comm",12),rep("body post",12)),
-                             coffee =  rep(popular_coffee,2))
-
-ggplot(df_coffee_type,aes(y = count, x = reorder(coffee,-count), fill = type)) +
-  geom_bar(stat="identity",position=position_dodge()) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  scale_fill_brewer(type = "seq",palette = "OrRd") +
-  geom_text(aes(label=count), vjust=1.6, color="black",
-            position = position_dodge(0.9), size=3.5) + xlab("coffee type")

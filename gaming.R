@@ -37,7 +37,8 @@ Comments_czas <- data.frame(date = as.numeric(format(as.Date(Comments$CreationDa
 czas_all <- cbind(rbind(Votes_czas,Posts_czas,Comments_czas), typ = c(rep("votes",nrow(Votes_czas)),rep("Posts",nrow(Posts_czas)),
                                                                       rep("Comments",nrow(Comments_czas))) )
 
-ggplot(czas_all, aes(x = date,y = liczba,fill = typ)) + geom_bar(stat="identity",position='dodge') 
+ggplot(czas_all, aes(x = date,y = liczba,fill = typ)) + geom_bar(stat="identity",position='dodge') +
+  labs(title = "Rozk³ad aktywnosci na forum gaming")
 
 ####################FREQUENCY WORD 
 frequency <- freq_terms(Comments$Text, top = 10, stopwords = stopwords("en"))
@@ -99,9 +100,12 @@ Comments$Text <- readRDS("gaming_comment_clean.rd")
 
 df_sentiment <- readRDS("gaming_df_sentiment.rds")
 
+df_sentiment$value[df_sentiment$variable == "suma"] <- df_sentiment$value[df_sentiment$variable == "suma"]/sum(df_sentiment$value[df_sentiment$variable == "suma"])
+
+df_sentiment$value[df_sentiment$variable == "liczba"] <- df_sentiment$value[df_sentiment$variable == "liczba"]/sum(df_sentiment$value[df_sentiment$variable == "liczba"])
 
 ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w komentarzach")
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w komentarzach rozklad gaming")
 
 #POSTY
 #comment_clean <- clean_text(Posts$Body)
@@ -143,8 +147,14 @@ Posts$Body <- readRDS("gaming_post_clean.rds")
 
 df_post <- readRDS("df_sentiment_gaming_post.rds")
 
+
+df_post$value[df_post$variable == "suma"] <- df_post$value[df_post$variable == "suma"]/sum(df_post$value[df_post$variable == "suma"])
+
+df_post$value[df_post$variable == "liczba"] <- df_post$value[df_post$variable == "liczba"]/sum(df_post$value[df_post$variable == "liczba"])
+
+
 ggplot(df_post,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w tresci postow")
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w tresci postow forum gaming")
 
 
 ########CZESTO UZYWANE SLOWA
@@ -167,7 +177,7 @@ top_word <- top_neg %>% union(top_pos) %>% arrange(count) %>% mutate(grupa = as.
 ggplot(top_word, aes(x = reorder(word,count), y = count, fill = grupa)) + geom_bar(stat="identity",position='dodge') + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("word") + 
   scale_fill_brewer(type = "seq",palette = "Set1") +
-  theme(legend.position="none") + labs(title = "Najczesciej uzywane pozytywne i negatywne slowa")
+  theme(legend.position="none") + labs(title = "Najczesciej uzywane pozytywne i negatywne slowa w komentarzach")
 
 ###POSTY
 #positive
@@ -188,7 +198,7 @@ top_word_post <- top_neg_post %>% union(top_pos_post) %>% arrange(count) %>% mut
 ggplot(top_word_post, aes(x = reorder(word,count), y = count, fill = grupa)) + geom_bar(stat="identity",position='dodge') + 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("word") + 
   scale_fill_brewer(type = "seq",palette = "Set1") +
-  theme(legend.position="none") + labs(title = "Najczesciej uzywane pozytywne i negatywne slowa")
+  theme(legend.position="none") + labs(title = "Najczesciej uzywane pozytywne i negatywne slowa w postach")
 
 
 #polarity
@@ -232,7 +242,7 @@ ggplot(top_word_post, aes(x = reorder(word,count), y = count, fill = grupa)) + g
 #                                                                                  rep("user",
 #                                                                                      length(polarity_by_user$group$ave.polarity))))
 # 
-saveRDS(polarity,"polarity_gaming.rds")
+#saveRDS(polarity,"polarity_gaming.rds")
 
 polarity_gaming <- readRDS("polarity_gaming.rds")
 
