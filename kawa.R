@@ -308,4 +308,4 @@ ggplot(df_coffee_type,aes(y = count, x = reorder(coffee,-count), fill = type)) +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   scale_fill_brewer(type = "seq",palette = "OrRd") +
   geom_text(aes(label=count), vjust=1.6, color="black",
-            position = position_dodge(0.9), size=3.5) + xlab("coffee type")
+            position = position_dodge(0.9), size=3.5) + xlab("coffee type") + labs(title = "Popularnosc rodzajow kawy")

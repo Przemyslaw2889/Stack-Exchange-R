@@ -301,3 +301,43 @@ bigram_freq_post <- sort(rowSums(bigram_dtm_post), decreasing = TRUE)
 
 wordcloud(names(bigram_freq_post),bigram_freq_post,max.words = 20, col = "tan")
 title("Wordcloud bigramow w tekscie postow")
+
+
+#POPULARNOSC GIER
+#komentarze
+popular_game <- c("minecraft", "gta","wow","battlefield","overwatch","league","cod","cs","dota","csgo","leagueoflegends")
+
+clean_coments <- lapply(Comm_corp, "[",1)
+game_type_comm <- lapply(clean_coments, stri_detect_fixed, popular_game)
+game_type_comm <- as.data.frame(t(as.data.frame(game_type_comm)))
+colnames(game_type_comm) <- popular_game
+sum_game_type_comm <- colSums(game_type_comm)
+sum_game_type_comm
+
+#tresc postow
+clean_posts_body <- lapply(Post_corp, "[",1)
+game_type_posts_body <- lapply(clean_posts_body, stri_detect_fixed, popular_game)
+game_type_posts_body <- as.data.frame(t(as.data.frame(game_type_posts_body)))
+colnames(game_type_posts_body) <- popular_game
+sum_game_type_posts <- colSums(game_type_posts_body)
+
+df_game_type <- data.frame(count = c(sum_game_type_comm,sum_game_type_posts), type = c(rep("comm",length(popular_game)),
+                                                                                       rep("body post",length(popular_game))),
+                             game =  rep(popular_game,2))
+df_game_type$count[df_game_type$type == "comm" & df_game_type$game == "leagueoflegends"] <- df_game_type$count[
+  df_game_type$type == "comm" & df_game_type$game == "leagueoflegends"] + df_game_type$count[
+    df_game_type$type == "comm" & df_game_type$game == "league"] 
+
+
+df_game_type$count[df_game_type$type == "body post" & df_game_type$game == "leagueoflegends"] <- df_game_type$count[
+  df_game_type$type == "body post" & df_game_type$game == "leagueoflegends"] + df_game_type$count[
+    df_game_type$type == "body post" & df_game_type$game == "league"] 
+
+df_game_type <- df_game_type[-c(17,6),]
+
+ggplot(df_game_type,aes(y = count, x = reorder(game,-count), fill = type)) +
+  geom_bar(stat="identity",position=position_dodge()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_fill_brewer(type = "seq",palette = "OrRd") +
+  geom_text(aes(label=count), vjust=1.6, color="black",
+            position = position_dodge(0.9), size=3.5) + xlab("game type") + labs(title = "Popularnosc poszczegolnych gier")

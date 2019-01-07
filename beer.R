@@ -278,3 +278,34 @@ bigram_freq_post <- sort(rowSums(bigram_dtm_post), decreasing = TRUE)
 wordcloud(names(bigram_freq_post),bigram_freq_post,max.words = 20, col = "tan")
 title("Wordcloud bigramow w tekscie postow")
 
+
+#POPULARNOSC RODZAJOW KAWY
+#komentarze
+
+popular_beer <- c("lager","pilsner","porter","stout","wheat", "ipa","apa","hefeweizen","bock")
+
+clean_coments <- lapply(Comm_corp, "[",1)
+beer_type_comm <- lapply(clean_coments, stri_detect_fixed, popular_beer)
+beer_type_comm <- as.data.frame(t(as.data.frame(beer_type_comm)))
+colnames(beer_type_comm) <- popular_beer
+sum_beer_type_comm <- colSums(beer_type_comm)
+
+sum_beer_type_comm
+
+#tresc postow
+clean_posts_body <- lapply(Post_corp, "[",1)
+beer_type_posts_body <- lapply(clean_posts_body, stri_detect_fixed, popular_beer)
+beer_type_posts_body <- as.data.frame(t(as.data.frame(beer_type_posts_body)))
+colnames(beer_type_posts_body) <- popular_beer
+sum_beer_type_posts <- colSums(beer_type_posts_body)
+
+df_beer_type <- data.frame(count = c(sum_beer_type_comm,sum_beer_type_posts), type = c(rep("comm",length(popular_beer)),
+                                                                                       rep("body post",length(popular_beer))),
+                             beer =  rep(popular_beer,2))
+
+ggplot(df_beer_type,aes(y = count, x = reorder(beer,-count), fill = type)) +
+  geom_bar(stat="identity",position=position_dodge()) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  scale_fill_brewer(type = "seq",palette = "OrRd") +
+  geom_text(aes(label=count), vjust=1.6, color="black",
+            position = position_dodge(0.9), size=3.5) + xlab("beer type") + labs("Popularnosc rodzajow piwa")
