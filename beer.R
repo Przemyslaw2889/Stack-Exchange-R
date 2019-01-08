@@ -58,81 +58,89 @@ clean_text <- function(text){
 }
 
 
-############KOMENTARZE
-comment_clean <- clean_text(Comments$Text)
+###########KOMENTARZE
+# comment_clean <- clean_text(Comments$Text)
+# 
+# comment_list <- as.list(comment_clean)
+# comment_list <- lapply(comment_list,stri_extract_all_regex, "[a-z]+")
+# comment_list <- lapply(comment_list,function(x){
+#   x <- data.frame(word = x)
+#   colnames(x) <- "word"
+#   x
+# })
+# 
+# list <- lapply(comment_list, function(x){
+#   x %>%
+#     inner_join(data.frame(get_sentiments("nrc")),by = "word") %>%
+#     group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
+# })
+# 
+# from_df_to_vector <- function(x){
+#   vec <- x[,2]
+#   names(vec) <- x[,1]
+#   vec
+# }
+# 
+# sentiment_vector <- unlist(lapply(list, from_df_to_vector))
+# 
+# #emocje
+# df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
+# df_sentiment <- df_sentiment %>% group_by(emocja) %>%
+#   summarise(suma = sum(moc), liczba_komentarzy = n())
+# df_sentiment$suma = df_sentiment$suma/(sum(df_sentiment$suma))
+# df_sentiment$liczba_komentarzy = df_sentiment$liczba_komentarzy/(sum(df_sentiment$liczba_komentarzy))
+# 
+# 
+# df_sentiment <- melt(df_sentiment,id.vars = "emocja")
+# df_sentiment <- df_sentiment[11:20,]
+# saveRDS(df_sentiment,"df_sentiment_beer.rds")
 
-comment_list <- as.list(comment_clean)
-comment_list <- lapply(comment_list,stri_extract_all_regex, "[a-z]+")
-comment_list <- lapply(comment_list,function(x){
-  x <- data.frame(word = x)
-  colnames(x) <- "word"
-  x
-})
-
-list <- lapply(comment_list, function(x){
-  x %>%
-    inner_join(data.frame(get_sentiments("nrc")),by = "word") %>% 
-    group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
-})
-
-from_df_to_vector <- function(x){
-  vec <- x[,2]
-  names(vec) <- x[,1]
-  vec
-}
-
-sentiment_vector <- unlist(lapply(list, from_df_to_vector))
-
-#emocje
-df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
-df_sentiment <- df_sentiment %>% group_by(emocja) %>%
-  summarise(suma = sum(moc), liczba_komentarzy = n())
-df_sentiment$suma = df_sentiment$suma/(sum(df_sentiment$suma))
-df_sentiment$liczba_komentarzy = df_sentiment$liczba_komentarzy/(sum(df_sentiment$liczba_komentarzy))
-
-
-df_sentiment <- melt(df_sentiment,id.vars = "emocja")
-
+df_sentiment <- readRDS("df_sentiment_beer.rds")
 ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w komentarzach")
 
-#POSTY
-comment_clean <- clean_text(Posts$Body)
+# #POSTY
+# comment_clean <- clean_text(Posts$Body)
+# 
+# comment_list <- as.list(comment_clean)
+# comment_list <- lapply(comment_list,stri_extract_all_regex, "[a-z]+")
+# comment_list <- lapply(comment_list,function(x){
+#   x <- data.frame(word = x)
+#   colnames(x) <- "word"
+#   x
+# })
+# 
+# list <- lapply(comment_list, function(x){
+#   x %>%
+#     inner_join(data.frame(get_sentiments("nrc")),by = "word") %>% 
+#     group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
+# })
+# 
+# from_df_to_vector <- function(x){
+#   vec <- x[,2]
+#   names(vec) <- x[,1]
+#   vec
+# }
+# 
+# sentiment_vector <- unlist(lapply(list, from_df_to_vector))
+# 
+# 
+# #emocje
+# df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
+# df_sentiment <- df_sentiment %>% group_by(emocja) %>%
+#   summarise(suma = sum(moc), liczba_postow = n())
+# 
+# df_sentiment$suma = df_sentiment$suma/(sum(df_sentiment$suma))
+# df_sentiment$liczba_postow = df_sentiment$liczba_postow/(sum(df_sentiment$liczba_postow))
+# 
+# 
+# df_sentiment <- melt(df_sentiment,id.vars = "emocja")
+# df_sentiment <- df_sentiment[11:20,]
+# df_sentiment$variable <- "beer"
+# 
+# saveRDS(df_sentiment,"df_sentiment_beer_post.rds")
 
-comment_list <- as.list(comment_clean)
-comment_list <- lapply(comment_list,stri_extract_all_regex, "[a-z]+")
-comment_list <- lapply(comment_list,function(x){
-  x <- data.frame(word = x)
-  colnames(x) <- "word"
-  x
-})
-
-list <- lapply(comment_list, function(x){
-  x %>%
-    inner_join(data.frame(get_sentiments("nrc")),by = "word") %>% 
-    group_by(sentiment) %>% count(sentiment, sort = TRUE) %>% as.data.frame() %>% top_n(1)
-})
-
-from_df_to_vector <- function(x){
-  vec <- x[,2]
-  names(vec) <- x[,1]
-  vec
-}
-
-sentiment_vector <- unlist(lapply(list, from_df_to_vector))
-
-
-#emocje
-df_sentiment <- data.frame(moc = sentiment_vector, emocja = names(sentiment_vector))
-df_sentiment <- df_sentiment %>% group_by(emocja) %>%
-  summarise(suma = sum(moc), liczba_postow = n())
-
-df_sentiment$suma = df_sentiment$suma/(sum(df_sentiment$suma))
-df_sentiment$liczba_postow = df_sentiment$liczba_postow/(sum(df_sentiment$liczba_postow))
-
-
-df_sentiment <- melt(df_sentiment,id.vars = "emocja")
-
+df_sentiment <- readRDS("df_sentiment_beer_post.rds")
 ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge') +
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") + labs(title = "Rozk³ad emocji w tresci postow")
 

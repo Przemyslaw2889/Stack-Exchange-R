@@ -245,6 +245,7 @@ ggplot(top_word_post, aes(x = reorder(word,count), y = count, fill = grupa)) + g
 #saveRDS(polarity,"polarity_gaming.rds")
 
 polarity_gaming <- readRDS("polarity_gaming.rds")
+head(polarity_gaming)
 
 ggplot(polarity_gaming,aes(y = polarity, x = by, color = by)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
                                                                       outlier.size=2,outlier.alpha = 0.1)
