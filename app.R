@@ -1,8 +1,9 @@
 library(shiny)
 source("tags.R")
+source("maps.R")
 
 ui <- navbarPage("Stack Exchange Forums Analysis",
-                 tabPanel("Component 1",
+                 tabPanel("Tags",
                           sidebarLayout(
                             
                             sidebarPanel(
@@ -17,7 +18,19 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                               plotOutput("barplot")
                             )
                           )),
-                 tabPanel("Component 2"),
+                 
+                 tabPanel("Maps",
+                          sidebarLayout(
+                            
+                            sidebarPanel(
+                              radioButtons("forum_maps", h3("Forum name"),
+                                           choices = list("beer"="beer", "coffee"="coffee", "gaming"="gaming"))
+                            ),
+                            
+                            mainPanel(
+                              plotOutput("map")
+                            )
+                          )),
                  tabPanel("Component 2")
 )
 
@@ -27,6 +40,13 @@ server <- function(input, output) {
     title <- "Most popular tags"
     tags_barplot_name(input$forum, input$n_tags, main=title)
   })
+  
+  output$map <- renderPlot({
+    print(input$fourm)
+    mapa(input$forum_maps)
+  })
 }
 
+
 shinyApp(ui=ui, server=server)
+

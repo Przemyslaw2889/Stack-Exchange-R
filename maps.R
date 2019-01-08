@@ -11,7 +11,7 @@ library(dplyr)
 # Badges_beer <- read.csv("data/beer.stackexchange.com/Badges.csv")
 # PostsHistory_beer <- read.csv("data/beer.stackexchange.com/PostHistory.csv")
 Posts_beer <- read.csv("data/beer.stackexchange.com/Posts.csv")
-#Users_beer <- read.csv("data/beer.stackexchange.com/Users.csv")
+Users_beer <- read.csv("data/beer.stackexchange.com/Users.csv")
 # Tags_beer <- read.csv("data/beer.stackexchange.com/Tags.csv")
 # Votes_beer <- read.csv("data/beer.stackexchange.com/Votes.csv")
 
@@ -19,7 +19,7 @@ Posts_beer <- read.csv("data/beer.stackexchange.com/Posts.csv")
 # Badges_gaming <- read.csv("data/gaming.stackexchange.com/Badges.csv")
 # PostsHistory_gaming <- read.csv("data/gaming.stackexchange.com/PostHistory.csv")
 Posts_gaming <- read.csv("data/gaming.stackexchange.com/Posts.csv")
-#Users_gaming <- read.csv("data/gaming.stackexchange.com/Users.csv")
+Users_gaming <- read.csv("data/gaming.stackexchange.com/Users.csv")
 # Tags_gaming <- read.csv("data/gaming.stackexchange.com/Tags.csv")
 # Votes_gaming <- read.csv("data/gaming.stackexchange.com/Votes.csv")
 
@@ -27,7 +27,7 @@ Posts_gaming <- read.csv("data/gaming.stackexchange.com/Posts.csv")
 # Badges_coffee <- read.csv("data/coffee.stackexchange.com/Badges.csv")
 # PostsHistory_coffee <- read.csv("data/coffee.stackexchange.com/PostHistory.csv")
 Posts_coffee <- read.csv("data/coffee.stackexchange.com/Posts.csv")
-#Users_coffee <- read.csv("data/coffee.stackexchange.com/Users.csv")
+Users_coffee <- read.csv("data/coffee.stackexchange.com/Users.csv")
 # Tags_coffee <- read.csv("data/coffee.stackexchange.com/Tags.csv")
 # Votes_coffee <- read.csv("data/coffee.stackexchange.com/Votes.csv")
 
@@ -94,8 +94,6 @@ najaktywniejsi_uzytkownicy_beer<- Posts_beer %>% group_by(OwnerUserId) %>% summa
 
 lok_naj_aktyw_beer <- lokacje(najaktywniejsi_uzytkownicy_beer[1:20,"Location"])
 
-points(lok_naj_aktyw_beer$lon,lok_naj_aktyw_beer$lan, pch = 16, cex = 0.7, col = "red")
-
 najw_pkt_beer <- Posts_beer %>% group_by(OwnerUserId) %>% summarise(pkt = sum(as.numeric(Score))) %>% 
   left_join(Users_beer,by = c("OwnerUserId" = "Id")) %>% select(pkt,OwnerUserId, Location) %>% arrange(desc(pkt)) %>% as.data.frame()
 
@@ -108,8 +106,6 @@ najaktywniejsi_uzytkownicy <- Posts_coffee %>% group_by(OwnerUserId) %>% summari
   left_join(Users_coffee,by = c("OwnerUserId" = "Id")) %>% select(ilosc,OwnerUserId, Location) %>% arrange(desc(ilosc)) %>% as.data.frame()
 
 lok_naj_aktyw <- lokacje(najaktywniejsi_uzytkownicy[1:20,"Location"])
-
-points(lok_naj_aktyw$lon,lok_naj_aktyw$lan, pch = 16, cex = 0.7, col = "red")
 
 najw_pkt <- Posts_coffee %>% group_by(OwnerUserId) %>% summarise(pkt = sum(as.numeric(Score))) %>% 
   left_join(Users_coffee,by = c("OwnerUserId" = "Id")) %>% select(pkt,OwnerUserId, Location) %>% arrange(desc(pkt)) %>% as.data.frame()
@@ -131,15 +127,12 @@ najaktywniejsi_uzytkownicy_gam <- Posts_gaming %>% group_by(OwnerUserId) %>% sum
 
 lok_naj_aktyw_gam <- lokacje(najaktywniejsi_uzytkownicy_gam[1:20,"Location"])
 
-points(lok_naj_aktyw_gam$lon,lok_naj_aktyw$lan[1:5], pch = 16, cex = 0.7, col = "red")
-
 najw_pkt_gam <- Posts_gaming %>% group_by(OwnerUserId) %>% summarise(pkt = sum(as.numeric(Score))) %>% 
   left_join(Users_gaming,by = c("OwnerUserId" = "Id")) %>% select(pkt,OwnerUserId, Location) %>% arrange(desc(pkt)) %>% as.data.frame()
 
 lok_najw_pkt_gam <- lokacje(najw_pkt_gam$Location[1:10])
 
 #funkcja do aplikacji
-
 
 lista_location <- list(coffee = locations_coffee,beer = locations_beers,gaming = locations_gaming)
 lista_najw_pkt <- list(coffee = lok_najw_pkt, beer = lok_najw_pkt_beer, gaming = lok_najw_pkt_gam )
@@ -155,3 +148,4 @@ mapa <- function(forum){
   legend(x = -183, y = -53,col = c("red","blue"), legend = c("most active users","users with highest number of likes"),pch = 16)
 }
 
+mapa("beer")
