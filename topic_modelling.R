@@ -45,7 +45,6 @@ text_matrix <- create_clean_matrix(texts)
 n_topics <- 3
 
 topic_lda <- LDA(text_matrix, k=n_topics, control=list(seed=42))
-summary(topic_lda)
 topic_lda
 topics <- tidy(topic_lda, matrix = "beta")
 

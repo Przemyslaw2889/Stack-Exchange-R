@@ -57,13 +57,15 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                               radioButtons("posts_or_comments", h3("Posts or Comments"),
                                            choices = list("posts"="posts", "comments"="comments")),
                               helpText("Polarity is a measure of emotion contained in a sentence.
-                                       It is positive (close to 1) if sentence is positive, -1 if negative."),
-                              textInput("text", "Text", "I hate this world")
+                                       The bigger it is the more positive the sentence.
+                                       Zero is neutral."),
+                              textInput("text", "Text", "I hate this world"),
+                              textOutput("polarity_text")
                             ),
                             
                             mainPanel(
-                              plotOutput("polarity_plot"),
-                              textOutput("polarity_text")
+                              plotOutput("polarity_plot")
+                              
                             )
                             
                           )),
