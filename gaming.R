@@ -112,6 +112,7 @@ ggplot(df_sentiment,aes(x = reorder(emocja,-value), y = value, fill = variable))
 
 #saveRDS(comment_clean, "gaming_post_clean.rds")
 
+
 Posts$Body <- readRDS("gaming_post_clean.rds")
 # 
 # comment_list <- as.list(comment_clean)
@@ -262,7 +263,7 @@ clean_corpus <- function(corpus) {
 
 
 #wybrane komentarze
-comm_gaming <- sample(x = 1:nrow(Comments),size = 3200,replace = FALSE)
+comm_gaming <- sample(x = 1:nrow(Comments),size = 5000,replace = FALSE)
 
 Comm_corp <- VCorpus(VectorSource(Comments$Text[comm_gaming]))
 #czyszczenie nie jest potrzebne, bo juz to zrobilismy 
@@ -270,8 +271,11 @@ Comm_corp <- VCorpus(VectorSource(Comments$Text[comm_gaming]))
 tdm_comm <- as.matrix(TermDocumentMatrix(Comm_corp))
 freq_word <- rowSums(tdm_comm)
 freq_word <- sort(freq_word, decreasing = TRUE)
+freq_word <- freq_word[1:100]
 
-wordcloud(names(freq_word),freq_word ,max.words = 20, col = "tan")
+
+
+wordcloud(names(freq_word),freq_word ,max.words = 100, col = "tan")
 title("Wordcloud slow w tekscie komentarzy")
 
 #wybrane posty 
