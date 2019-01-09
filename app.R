@@ -1,13 +1,15 @@
 library(shiny)
 source("tags.R")
 source("maps.R")
+source("boxplot_app_polarity.R")
+source("polarity_function_app.R")
 
 ui <- navbarPage("Stack Exchange Forums Analysis",
                  tabPanel("Tags",
                           sidebarLayout(
                             
                             sidebarPanel(
-                              radioButtons("forum", h3("Forum name"),
+                              radioButtons("forum_barplot", h3("Forum name"),
                                            choices = list("beer"="beer", "coffee"="coffee", "gaming"="gaming")),
                               sliderInput("n_tags", "Number of tags:",  
                                           min = 2, max = 20, value = 10)
@@ -31,19 +33,45 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                               plotOutput("map")
                             )
                           )),
-                 tabPanel("Component 2")
+                 
+                 tabPanel("Polarity",
+                          sidebarLayout(
+                            
+                            sidebarPanel(
+                              radioButtons("posts_or_comments", h3("Posts or Comments"),
+                                           choices = list("posts"="posts", "comments"="comments")),
+                              helpText("Polarity is a measure of emotion contained in a sentence.
+                                       It is positive (close to 1) if sentence is positive, -1 if negative."),
+                              textInput("text", "Text", "I hate this world")
+                            ),
+                            
+                            mainPanel(
+                              plotOutput("polarity_plot"),
+                              textOutput("polarity_text")
+                            )
+                            
+                          )),
+                 
+                 tabPanel("Component")
 )
 
 
 server <- function(input, output) {
   output$barplot <- renderPlot({
     title <- "Most popular tags"
-    tags_barplot_name(input$forum, input$n_tags, main=title)
+    tags_barplot_name(input$forum_barplot, input$n_tags, main=title)
   })
   
   output$map <- renderPlot({
-    print(input$fourm)
     mapa(input$forum_maps)
+  })
+  
+  output$polarity_plot <- renderPlot({
+    boxplot_app(input$posts_or_comments)
+  })
+  
+  output$polarity_text <- renderText({
+    polarity_text(input$text)
   })
 }
 

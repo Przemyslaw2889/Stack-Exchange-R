@@ -46,10 +46,11 @@ user <- data.frame(polarity = c(polarity_gaming$polarity[polarity_gaming$by == "
 #                                                                                  outlier.size=2,outlier.alpha = 0.1)+
 #   labs(title = "porownanie user")
 
+option_list = list(comments = comment_ID, posts = post)
+
 boxplot_app <- function(by){
-  ggplot(by,aes(y = polarity, x = forum, color = forum)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
+  ggplot(option_list[[by]], aes(y = polarity, x = forum, color = forum)) + geom_boxplot(outlier.colour="black", outlier.shape=16,
                                                                                    outlier.size=2,outlier.alpha = 0.1)+
-    labs(title = "porownanie user")
+    labs(title = "Comparison of polarity between forums")
 }
 
-boxplot_app(post)
