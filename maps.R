@@ -7,53 +7,15 @@ library(dplyr)
 
 ## Data reading
 # Wszystkie dane mam wypakowane w folderze data i przekonwertowane na csv
-# Comments_beer <- read.csv("data/beer.stackexchange.com/Comments.csv")
-# Badges_beer <- read.csv("data/beer.stackexchange.com/Badges.csv")
-# PostsHistory_beer <- read.csv("data/beer.stackexchange.com/PostHistory.csv")
+
 Posts_beer <- read.csv("data/beer.stackexchange.com/Posts.csv")
 Users_beer <- read.csv("data/beer.stackexchange.com/Users.csv")
-# Tags_beer <- read.csv("data/beer.stackexchange.com/Tags.csv")
-# Votes_beer <- read.csv("data/beer.stackexchange.com/Votes.csv")
 
-# Comments_gaming <- read.csv("data/gaming.stackexchange.com/Comments.csv")
-# Badges_gaming <- read.csv("data/gaming.stackexchange.com/Badges.csv")
-# PostsHistory_gaming <- read.csv("data/gaming.stackexchange.com/PostHistory.csv")
 Posts_gaming <- read.csv("data/gaming.stackexchange.com/Posts.csv")
 Users_gaming <- read.csv("data/gaming.stackexchange.com/Users.csv")
-# Tags_gaming <- read.csv("data/gaming.stackexchange.com/Tags.csv")
-# Votes_gaming <- read.csv("data/gaming.stackexchange.com/Votes.csv")
 
-# Comments_coffee <- read.csv("data/coffee.stackexchange.com/Comments.csv")
-# Badges_coffee <- read.csv("data/coffee.stackexchange.com/Badges.csv")
-# PostsHistory_coffee <- read.csv("data/coffee.stackexchange.com/PostHistory.csv")
 Posts_coffee <- read.csv("data/coffee.stackexchange.com/Posts.csv")
 Users_coffee <- read.csv("data/coffee.stackexchange.com/Users.csv")
-# Tags_coffee <- read.csv("data/coffee.stackexchange.com/Tags.csv")
-# Votes_coffee <- read.csv("data/coffee.stackexchange.com/Votes.csv")
-
-# Comments_beer <- xml_data_frame("data/beer.stackexchange.com/Comments.xml")
-# Badges_beer <- xml_data_frame("data/beer.stackexchange.com/Badges.xml")
-# PostsHistory_beer <- xml_data_frame("data/beer.stackexchange.com/PostHistory.xml")
-# Posts_beer <- xml_data_frame("data/beer.stackexchange.com/Posts.xml")
-# Users_beer <- xml_data_frame("data/beer.stackexchange.com/Users.xml")
-# Tags_beer <- xml_data_frame("data/beer.stackexchange.com/Tags.xml")
-# Votes_beer <- xml_data_frame("data/beer.stackexchange.com/Votes.xml")
-# 
-# Comments_gaming <- xml_data_frame("data/gaming.stackexchange.com/Comments.xml")
-# Badges_gaming <- xml_data_frame("data/gaming.stackexchange.com/Badges.xml")
-# PostsHistory_gaming <- xml_data_frame("data/gaming.stackexchange.com/PostHistory.xml")
-# Posts_gaming <- xml_data_frame("data/gaming.stackexchange.com/Posts.xml")
-# Users_gaming <- xml_data_frame("data/gaming.stackexchange.com/Users.xml")
-# Tags_gaming <- xml_data_frame("data/gaming.stackexchange.com/Tags.xml")
-# Votes_gaming <- xml_data_frame("data/gaming.stackexchange.com/Votes.xml")
-#
-# Comments_coffee <- xml_data_frame("data/coffee.stackexchange.com/Comments.xml")
-# Badges_coffee <- xml_data_frame("data/coffee.stackexchange.com/Badges.xml")
-# PostsHistory_coffee <- xml_data_frame("data/coffee.stackexchange.com/PostHistory.xml")
-# Posts_coffee <- xml_data_frame("data/coffee.stackexchange.com/Posts.xml")
-# Users_coffee <- xml_data_frame("data/coffee.stackexchange.com/Users.xml")
-# Tags_coffee <- xml_data_frame("data/coffee.stackexchange.com/Tags.xml")
-# Votes_coffee <- xml_data_frame("data/coffee.stackexchange.com/Votes.xml")
 
 lokacje <- function(lokalizacje){
   location <- strsplit(lokalizacje[stri_detect_regex(lokalizacje,",")], split = ",")

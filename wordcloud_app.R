@@ -9,6 +9,6 @@ option_list_wordcloud = list("beer"=beer, "coffee"=coffee, "gaming"=gaming)
 wordcloud_app <- function(forum, n = 30){
   data <- option_list_wordcloud[[forum]]
   wordcloud(names(data), data, max.words = n, col = "tan")
-  title(paste("Wordcloud of comments", forum))
+  title(paste("Wordcloud of comments:", forum))
 }
 
