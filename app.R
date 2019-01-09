@@ -3,6 +3,7 @@ source("tags.R")
 source("maps.R")
 source("boxplot_app_polarity.R")
 source("polarity_function_app.R")
+source("wordcloud_app.R")
 
 ui <- navbarPage("Stack Exchange Forums Analysis",
                  tabPanel("Tags",
@@ -31,6 +32,21 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             
                             mainPanel(
                               plotOutput("map")
+                            )
+                          )),
+                 
+                 tabPanel("Wordclouds",
+                          sidebarLayout(
+                            
+                            sidebarPanel(
+                              radioButtons("forum_wordcloud", h3("Forum name"),
+                                           choices = list("beer"="beer", "coffee"="coffee", "gaming"="gaming")),
+                              sliderInput("n_words", "Number of words in wordcloud:",  
+                                          min = 10, max = 100, value = 30)
+                            ),
+                            
+                            mainPanel(
+                              plotOutput("wordcloud")
                             )
                           )),
                  
@@ -72,6 +88,10 @@ server <- function(input, output) {
   
   output$polarity_text <- renderText({
     polarity_text(input$text)
+  })
+  
+  output$wordcloud <- renderPlot({
+    wordcloud_app(input$forum_wordcloud, input$n_words)
   })
 }
 
