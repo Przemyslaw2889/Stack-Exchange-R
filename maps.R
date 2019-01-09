@@ -147,5 +147,3 @@ mapa <- function(forum){
   points(lista_najaktyw[[forum]]$lon , lista_najaktyw[[forum]]$lan,pch=16,cex = 0.7, col = "red")
   legend(x = -183, y = -53,col = c("red","blue"), legend = c("most active users","users with highest number of likes"),pch = 16)
 }
-
-mapa("beer")
