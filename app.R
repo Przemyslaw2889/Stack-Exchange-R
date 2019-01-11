@@ -1,4 +1,5 @@
 library(shiny)
+library(shinythemes)
 source("tags.R")
 source("maps.R")
 source("boxplot_app_polarity.R")
@@ -42,7 +43,7 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             sidebarPanel(
                               radioButtons("forum_wordcloud", h3("Forum name"),
                                            choices = list("beer"="beer", "coffee"="coffee", "gaming"="gaming")),
-                              sliderInput("n_words", "Number of words in wordcloud:",  
+                              sliderInput("n_words", "Number of words in a wordcloud:",  
                                           min = 10, max = 100, value = 30)
                             ),
                             
@@ -96,7 +97,9 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             )
                           )),
                  
-                 tabPanel("Component")
+                 tabPanel("Component"),
+                 
+                 theme = shinytheme("superhero")
 )
 
 
@@ -124,7 +127,6 @@ server <- function(input, output) {
   
   output$emotion_barplot <- renderPlot({
     barplot_emotion(input$emotion_post_or_comments, input$emotion_list)
-    #as.character(input$emotion_list)
   })
 }
 

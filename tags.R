@@ -24,8 +24,8 @@ tags_barplot <- function(Tags, k=10, ...){
 # tags_barplot(Tags_gaming, 10)
 # tags_barplot(Tags_coffee, 5)
 
-# tags_barplot_name <- function(name, k=10, ...){
-#   tags = list(coffee=Tags_coffee, beer=Tags_beer, gaming=Tags_gaming)
-#   tags_barplot(tags[[name]], k, ...)
-# }
+tags_barplot_name <- function(name, k=10, ...){
+  tags = list(coffee=Tags_coffee, beer=Tags_beer, gaming=Tags_gaming)
+  tags_barplot(tags[[name]], k, ...)
+}
 
