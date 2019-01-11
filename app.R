@@ -47,7 +47,7 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             ),
                             
                             mainPanel(
-                              plotOutput("emotion_barplot")
+                              plotOutput("wordcloud")
                             )
                           )),
                  
@@ -65,7 +65,7 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             ),
                             
                             mainPanel(
-                              plotOutput("emotion_barplot")
+                              plotOutput("polarity_plot")
                               
                             )
                             
@@ -76,7 +76,7 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             
                             sidebarPanel(
                               radioButtons("emotion_post_or_comments", h3("Posts or Comments"),
-                                           choices = list("posts"="Posts", "comments"="Comments")),
+                                           choices = list("Posts"="Posts", "Comments"="Comments")),
                               checkboxGroupInput("emotion_list", 
                                                  h3("Choose emotions"), 
                                                  choices = list("anger" = "anger", 
@@ -89,10 +89,10 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                                                                 "sadness" = "sadness",
                                                                 "surprise" = "surprise",
                                                                 "trust" = "trust"),
-                                                 selected = "anger")
+                                                 selected = c("anger", "negative"))
                             ),
                             mainPanel(
-                              plotOutput("wordcloud")
+                              plotOutput("emotion_barplot")
                             )
                           )),
                  
@@ -123,12 +123,14 @@ server <- function(input, output) {
   })
   
   output$emotion_barplot <- renderPlot({
+    print(is.vector(input$emotion_list))
     barplot_emotion(input$emotion_posts_or_comments, input$emotion_list)
-    print(input$emotion_list)
+    #as.character(input$emotion_list)
   })
 }
 
 
 shinyApp(ui=ui, server=server)
 
-barplot_emotion("Comments", c("anger", "negative"))
+barplot_emotion("Comments", c("anger", "positive"))
+is.vector(c("anger", "positive"))
