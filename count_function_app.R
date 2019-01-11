@@ -38,7 +38,6 @@ Comments_beer$typ <- "Comments"
 beer_df <- rbind(Posts_beer,Comments_beer)
 
 
-
 #GAMING
 # Votes_gaming <- read.csv("data/gaming.stackexchange.com/Votes.csv")
 Comments_gaming <- read.csv("data/gaming.stackexchange.com/Comments.csv")
@@ -63,14 +62,14 @@ list_of_count <- list(gaming = gaming_df, beer = beer_df, coffee = coffee_df)
 count_post_comment <- function(forum){
   if (forum == "gaming"){
   ggplot(list_of_count[[forum]], aes(x = date,y = liczba,fill = typ)) + geom_bar(stat="identity",position='dodge') +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  scale_x_discrete(breaks = unique(gaming_all$date)[
-      seq(1, length(unique(gaming_all$date)), by = 3)]) + labs(title = paste("Number of posts and comments on",forum,"forum"))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  scale_x_discrete(breaks = unique(gaming_df$date)[
+      seq(1, length(unique(gaming_df$date)), by = 3)]) + labs(title = paste("Number of posts and comments on",forum,"forum"))
     }
   else{
     ggplot(list_of_count[[forum]], aes(x = date,y = liczba,fill = typ)) + geom_bar(stat="identity",position='dodge') +
-      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  scale_x_discrete(breaks = unique(gaming_all$date)[
-        seq(1, length(unique(gaming_all$date)), by = 2)]) + labs(title = paste("Number of posts and comments on",forum,"forum"))
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  scale_x_discrete(breaks = unique(list_of_count[[forum]]$date)[
+        seq(1, length(unique(list_of_count[[forum]]$date)), by = 2)]) + labs(title = paste("Number of posts and comments on",forum,"forum"))
   }
 }
 
-#count_post_comment("coffee")
+count_post_comment("coffee")

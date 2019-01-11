@@ -6,6 +6,7 @@ source("boxplot_app_polarity.R")
 source("polarity_function_app.R")
 source("wordcloud_app.R")
 source("emotion_barplot_app.R")
+source("count_function_app.R")
 
 ui <- navbarPage("Stack Exchange Forums Analysis",
                  tabPanel("Tags",
@@ -21,6 +22,19 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             
                             mainPanel(
                               plotOutput("barplot")
+                            )
+                          )),
+                 
+                 tabPanel("Something in time",
+                          sidebarLayout(
+                            
+                            sidebarPanel(
+                              radioButtons("forum_time", h3("Forum name"),
+                                           choices = list("beer"="beer", "coffee"="coffee", "gaming"="gaming"))
+                            ),
+                            
+                            mainPanel(
+                              plotOutput("count_function")
                             )
                           )),
                  
@@ -109,6 +123,10 @@ server <- function(input, output) {
     tags_barplot_name(input$forum_barplot, input$n_tags, main=title)
   })
   
+  output$count_function <- renderPlot({
+    count_post_comment(input$forum_time)
+  })
+  
   output$map <- renderPlot({
     mapa(input$forum_maps)
   })
@@ -128,6 +146,7 @@ server <- function(input, output) {
   output$emotion_barplot <- renderPlot({
     barplot_emotion(input$emotion_post_or_comments, input$emotion_list)
   })
+  
 }
 
 
