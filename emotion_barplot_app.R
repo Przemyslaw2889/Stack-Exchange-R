@@ -44,11 +44,14 @@ df_sentiment_coffee_post <- readRDS("df_sentiment_coffee_post.rds")
 
 Posts <- rbind(df_sentiment_gaming_post,df_sentiment_beer_post,df_sentiment_coffee_post)
 
-barplot_emotion <- function(typ){
-  ggplot(typ,aes(x = reorder(emocja,-value), y = value, fill = variable)) + geom_bar(stat="identity",position='dodge')+
+barplot_emotion <- function(typ, emocje = unique(Comments$emocja))
+{
+  ggplot(typ[typ$emocja %in% emocje, ],aes(x = reorder(emocja,-value), y = value, fill = variable)) +
+    geom_bar(stat="identity",position='dodge')+
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") +ylab("% udzia³") + labs(title = "Rozk³ad emocji")
   
 }
 
-# barplot_emotion(Comments)
+#barplot_emotion(Comments, c("positive",'negative'))
+
 
