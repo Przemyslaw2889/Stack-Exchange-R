@@ -51,7 +51,7 @@ barplot_emotion <- function(typ, emocje = unique(Comments$emocja))
 {
   ggplot(type_list[[typ]][type_list[[typ]]$emocja %in% emocje, ],aes(x = reorder(emocja,-value), y = value, fill = variable)) +
     geom_bar(stat="identity",position='dodge')+
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emocje") +ylab("% udzia³") + labs(title = paste("Rozk³ad emocji", typ))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) + xlab("emotions") +ylab("%") + labs(title = paste("emotions distribution", typ))
   
 }
 

@@ -4,6 +4,7 @@ source("maps.R")
 source("boxplot_app_polarity.R")
 source("polarity_function_app.R")
 source("wordcloud_app.R")
+source("emotion_barplot_app.R")
 
 ui <- navbarPage("Stack Exchange Forums Analysis",
                  tabPanel("Tags",
@@ -46,7 +47,7 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             ),
                             
                             mainPanel(
-                              plotOutput("wordcloud")
+                              plotOutput("emotion_barplot")
                             )
                           )),
                  
@@ -64,10 +65,35 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             ),
                             
                             mainPanel(
-                              plotOutput("polarity_plot")
+                              plotOutput("emotion_barplot")
                               
                             )
                             
+                          )),
+                 
+                 tabPanel("Emotions",
+                          sidebarLayout(
+                            
+                            sidebarPanel(
+                              radioButtons("emotion_post_or_comments", h3("Posts or Comments"),
+                                           choices = list("posts"="Posts", "comments"="Comments")),
+                              checkboxGroupInput("emotion_list", 
+                                                 h3("Choose emotions"), 
+                                                 choices = list("anger" = "anger", 
+                                                                "anticipation" = "anticipation", 
+                                                                "disgutst" = "disgust",
+                                                                "fear" = "fear",
+                                                                "joy" = "joy",
+                                                                "negative" = "negative",
+                                                                "positive" = "positive",
+                                                                "sadness" = "sadness",
+                                                                "surprise" = "surprise",
+                                                                "trust" = "trust"),
+                                                 selected = "anger")
+                            ),
+                            mainPanel(
+                              plotOutput("wordcloud")
+                            )
                           )),
                  
                  tabPanel("Component")
@@ -95,8 +121,14 @@ server <- function(input, output) {
   output$wordcloud <- renderPlot({
     wordcloud_app(input$forum_wordcloud, input$n_words)
   })
+  
+  output$emotion_barplot <- renderPlot({
+    barplot_emotion(input$emotion_posts_or_comments, input$emotion_list)
+    print(input$emotion_list)
+  })
 }
 
 
 shinyApp(ui=ui, server=server)
 
+barplot_emotion("Comments", c("anger", "negative"))
