@@ -44,7 +44,7 @@ df_sentiment_coffee_post <- readRDS("df_sentiment_coffee_post.rds")
 
 Posts <- rbind(df_sentiment_gaming_post,df_sentiment_beer_post,df_sentiment_coffee_post)
 
-type_list <- list(Posts = Posts, Comments = Comments)
+type_list <- list("Posts" = Posts, "Comments" = Comments)
 
 
 barplot_emotion <- function(typ, emocje = unique(Comments$emocja))
