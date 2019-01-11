@@ -60,7 +60,7 @@ gaming_df <- rbind(Posts_gaming,Comments_gaming)
 
 list_of_count <- list(gaming = gaming_df, beer = beer_df, coffee = coffee_df)
 
-count_post_comment <- function(forum,typ){
+count_post_comment <- function(forum){
   if (forum == "gaming"){
   ggplot(list_of_count[[forum]], aes(x = date,y = liczba,fill = typ)) + geom_bar(stat="identity",position='dodge') +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +  scale_x_discrete(breaks = unique(gaming_all$date)[
@@ -73,4 +73,4 @@ count_post_comment <- function(forum,typ){
   }
 }
 
-#count_post_comment("beer")
+#count_post_comment("coffee")
