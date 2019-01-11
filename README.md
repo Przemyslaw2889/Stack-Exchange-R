@@ -13,6 +13,7 @@ w tym interaktywne wizualizacje i wykresy.
 * `maps.R` tworzenie map z zaznaczonymi użytkownikami (wszystkimi, najbardziej aktywnymi oraz piszącymi najlepsze posty)
 * `polarity_function_app.R` mierzenie *polarity* (wydźwięku emocjonalnego - pozytywny lub negatywny) danego tekstu
 * `boxplot_app_polarity.R` rysowanie boxplotów wielkości polarity w komentarzach
+* `emotion_barplot_app.R` skypt do rysowania barplotów poszczególnych emocji na forach
 
 * `df_from_xml` funkcja pobierające dane z XMLa do ramki danych
 
