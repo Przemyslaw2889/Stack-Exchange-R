@@ -25,7 +25,7 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                             )
                           )),
                  
-                 tabPanel("Something in time",
+                 tabPanel("Users activity in time",
                           sidebarLayout(
                             
                             sidebarPanel(
@@ -110,8 +110,6 @@ ui <- navbarPage("Stack Exchange Forums Analysis",
                               plotOutput("emotion_barplot")
                             )
                           )),
-                 
-                 tabPanel("Component"),
                  
                  theme = shinytheme("superhero")
 )
